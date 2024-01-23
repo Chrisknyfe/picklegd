@@ -1,9 +1,10 @@
 extends Resource
 class_name Pickler
 
+"""The default pickler"""
 
 func pickle(obj, registry):
-	pass
+	return JSON.stringify({})
 	
 func unpickle(datastruct, registry):
-	pass
+	return JSON.parse_string(datastruct)
