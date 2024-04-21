@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bc0sigx63wvsx"]
 
 [ext_resource type="Script" path="res://example/picklemp/UnitTest.gd" id="1_43k5n"]
-[ext_resource type="Script" path="res://addons/picklemp/pickler_registry.gd" id="2_pqxr3"]
+[ext_resource type="Script" path="res://addons/picklemp/pickler.gd" id="2_jywj4"]
 
 [node name="UnitTest" type="Control"]
 layout_mode = 3
@@ -12,5 +12,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_43k5n")
 
-[node name="PicklerRegistry" type="Node" parent="."]
-script = ExtResource("2_pqxr3")
+[node name="Pickler" type="Node" parent="."]
+script = ExtResource("2_jywj4")
+preregistry = [null]

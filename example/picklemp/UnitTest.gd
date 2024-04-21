@@ -2,28 +2,36 @@ extends Control
 
 """Test the pickler system"""
 
-@onready var reg: PicklerRegistry = $PicklerRegistry
+@onready var pickler: Pickler = $Pickler
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	print(typeof(CustomClassOne))
-	reg.register_class(CustomClassOne)
-	reg.register_class(CustomClassTwo)
+	pickler.register_class(CustomClassOne)
+	pickler.register_class(CustomClassTwo)
 	
 	
-	var obj = {
+	var some_gdscript_data = {
 		"one": CustomClassOne.new(),
 		"two": CustomClassTwo.new()
 	}
-	obj["one"].foo = 2.0
-	obj["two"].qux = "I turned myself into a pickle. I'm pickle Riiiick"
-	var p = reg.pre_pickle(obj)
+	some_gdscript_data["one"].foo = 2.0
+	some_gdscript_data["two"].qux = "I turned myself into a pickle. I'm pickle Riiiick"
 	
-	var s = JSON.stringify(p, "    ")
+	var pickle = pickler.pre_pickle(some_gdscript_data)
+	
+	var s = JSON.stringify(pickle, "    ")
 	print(s)
 	
-	var u = reg.post_unpickle(p)
-	print(u)
+	# TODO:
+	# - pickle_json
+	# - pickle (bytes)
+	# - gzip the bytes
+	
+	# people play games for mastery, connection, or expression
+	# survival, villagers, techbuilds
+	var unpickle = pickler.post_unpickle(pickle)
+	print(unpickle)
 	
 	#print('me: %s' % [ CustomClassOne ])
 	##print('name: %s' % [ CustomClassOne.name ])
