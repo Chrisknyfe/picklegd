@@ -15,11 +15,12 @@ func _ready():
 		"two": CustomClassTwo.new()
 	}
 	some_gdscript_data["one"].foo = 2.0
-	some_gdscript_data["two"].qux = "I turned myself into a pickle. I'm pickle Riiiick"
+	some_gdscript_data["two"].qux = "r"
 	
-	var pickle = pickler.pre_pickle(some_gdscript_data)
 	
-	var s = JSON.stringify(pickle, "    ")
+	var pre = pickler.pre_pickle(some_gdscript_data)
+	
+	var s = JSON.stringify(pre, "    ")
 	print(s)
 	
 	# TODO:
@@ -29,7 +30,14 @@ func _ready():
 	
 	# people play games for mastery, connection, or expression
 	# survival, villagers, techbuilds
-	var unpickle = pickler.post_unpickle(pickle)
+	var post = pickler.post_unpickle(pre)
+	print(post)
+	
+	var pickle = pickler.pickle(some_gdscript_data)
+	print("pickle size: ", len(pickle))
+	print(pickle)
+	var unpickle = pickler.unpickle(pickle)
+	
 	print(unpickle)
 	
 	#print('me: %s' % [ CustomClassOne ])
@@ -41,3 +49,6 @@ func _ready():
 	#
 	#var message = "This is a test message."
 	#print_debug('%s "%s": %s' % [ self, name, message ])
+	
+	await get_tree().create_timer(1).timeout
+	get_tree().quit()

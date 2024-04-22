@@ -16,6 +16,11 @@ func register_class(c: Object):
 	rc.class_def = c
 	register(rc)
 	
+func pickle(obj) -> PackedByteArray:
+	return var_to_bytes(pre_pickle(obj))
+
+func unpickle(buffer: PackedByteArray):
+	return post_unpickle(bytes_to_var(buffer))
 
 func pre_pickle(obj):
 	"""Recursively pickle all the objects in this arbitrary object hierarchy"""
