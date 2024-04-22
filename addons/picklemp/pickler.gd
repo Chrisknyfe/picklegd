@@ -6,13 +6,12 @@ class_name Pickler
 @export var preregistry: Array = []
 
 func register_class(c: Object, p: Object=null):
-	var pt = PicklerType.new()
+	"""Register a class with the default pickler"""
+	var pt = ObjectPickler.new()
 	pt.name = c.resource_path
 	pt.class_def = c
 	pt.class_pickler = p
 	register(pt)
-	
-	
 	
 
 func pre_pickle(obj):
@@ -44,20 +43,10 @@ func pre_pickle(obj):
 			# the following will become the default pickler
 			var out = {}
 			out["__class__"] = pt.id
-			print("name | class_name | type | hint | hint_string | usage")
 			for prop in obj.get_property_list():
 				if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-					print(prop.name, " | ", prop.class_name, " | ", prop.type, " | ", prop.hint, " | ", prop.hint_string, " | ", prop.usage)
-					out[prop.name] = obj.get(prop.name)
-				else:
-					print(prop.name, " [SKIP]")
-			print("now for the class itself...")
-			for prop in pt.class_def.get_property_list():
-				if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-					print(prop.name, " | ", prop.class_name, " | ", prop.type, " | ", prop.hint, " | ", prop.hint_string, " | ", prop.usage)
-				else:
-					print(prop.name, " [SKIP]")
-			
+					var value = obj.get(prop.name)
+					out[prop.name] = pre_pickle(value)
 			return out
 		# most objects are just passed through
 		_:
@@ -73,11 +62,12 @@ func post_unpickle(obj):
 		TYPE_DICTIONARY:
 			var d : Dictionary = obj as Dictionary
 			if "__class__" in d:
-				var pt : PicklerType = get_by_id(d["__class__"])
+				var pt : ObjectPickler = get_by_id(d["__class__"])
 				var out = pt.class_def.new()
 				for prop in out.get_property_list():
 					if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-						out.set(prop.name, d[prop.name])
+						var value = d[prop.name]
+						out.set(prop.name, post_unpickle(value))
 				return out
 			else:
 				var out = {}
