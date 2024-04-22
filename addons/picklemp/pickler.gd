@@ -5,13 +5,16 @@ class_name Pickler
 
 @export var preregistry: Array = []
 
-func register_class(c: Object, p: Object=null):
+class RegisteredClass extends RegisteredBehavior:
+	var class_def: Object
+	
+
+func register_class(c: Object):
 	"""Register a class with the default pickler"""
-	var pt = ObjectPickler.new()
-	pt.name = c.resource_path
-	pt.class_def = c
-	pt.class_pickler = p
-	register(pt)
+	var rc = RegisteredClass.new()
+	rc.name = c.resource_path
+	rc.class_def = c
+	register(rc)
 	
 
 func pre_pickle(obj):
@@ -38,16 +41,17 @@ func pre_pickle(obj):
 			print("pickling object of type: ", obj)
 			var path = obj.get_script().resource_path
 			# TODO: option to error, warn, or silent 
-			var pt = get_by_name(path) # will throw error if this doesn't work 
+			var rc = get_by_name(path) # will throw error if this doesn't work 
 			
-			# the following will become the default pickler
-			var out = {}
-			out["__class__"] = pt.id
-			for prop in obj.get_property_list():
-				if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-					var value = obj.get(prop.name)
-					out[prop.name] = pre_pickle(value)
-			return out
+			var dict = {}
+			if obj.has_method("__getstate__"):
+				dict = obj.__getstate__()
+			else:
+				for prop in obj.get_property_list():
+					if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
+						dict[prop.name] = pre_pickle(obj.get(prop.name))
+			dict["__class__"] = rc.id
+			return dict
 		# most objects are just passed through
 		_:
 			return obj
@@ -60,20 +64,22 @@ func post_unpickle(obj):
 			return null
 		# Collection Types - recursion!
 		TYPE_DICTIONARY:
-			var d : Dictionary = obj as Dictionary
-			if "__class__" in d:
-				var pt : ObjectPickler = get_by_id(d["__class__"])
-				var out = pt.class_def.new()
-				for prop in out.get_property_list():
-					if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-						var value = d[prop.name]
-						out.set(prop.name, post_unpickle(value))
+			var dict : Dictionary = obj as Dictionary
+			for key in dict:
+				dict[key] = post_unpickle(dict[key])
+			if "__class__" in dict:
+				var rc : RegisteredClass = get_by_id(dict["__class__"])
+				dict.erase("__class__")
+				var out = rc.class_def.new()
+				if out.has_method("__setstate__"):
+					out.__setstate__(dict)
+				else:
+					for prop in out.get_property_list():
+						if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
+							out.set(prop.name, dict[prop.name])
 				return out
 			else:
-				var out = {}
-				for key in d:
-					out[key] = post_unpickle(d[key])
-				return out
+				return dict
 		TYPE_ARRAY:
 			var out = []
 			var a : Array = obj as Array
