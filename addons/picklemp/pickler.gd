@@ -6,14 +6,20 @@ class_name Pickler
 @export var preregistry: Array = []
 
 class RegisteredClass extends RegisteredBehavior:
-	var class_def: Object
-	
+	var custom_class_def: Object
 
-func register_class(c: Object):
-	"""Register a class with the default pickler"""
+func register_custom_class(c: Script):
+	"""Register a custom class."""
 	var rc = RegisteredClass.new()
 	rc.name = c.resource_path
-	rc.class_def = c
+	rc.custom_class_def = c
+	register(rc)
+
+func register_native_class(cls_name: String):
+	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
+	var rc = RegisteredClass.new()
+	rc.name = cls_name
+	rc.custom_class_def = null
 	register(rc)
 	
 func pickle(obj) -> PackedByteArray:
@@ -43,15 +49,24 @@ func pre_pickle(obj):
 			return out
 		# Objects - only registered objects get pickled
 		TYPE_OBJECT:
-			print("pickling object of type: ", obj)
-			var path = obj.get_script().resource_path
+			#print("pickling object of type: ", obj)
+			
+			var scr = obj.get_script()
+			var key = ""
+			if scr != null:
+				key = scr.resource_path
+			else:
+				key = obj.get_class()
+			
 			# TODO: option to error, warn, or silent 
-			var rc = get_by_name(path) # will throw error if this doesn't work 
+			var rc = get_by_name(key) # will throw error if this doesn't work 
 			
 			var dict = {}
 			if obj.has_method("__getstate__"):
 				dict = obj.__getstate__()
 			else:
+				#print("obj property list: ", obj.get_property_list())
+				#print("script property list: ", obj.get_script().get_script_property_list())
 				for prop in obj.get_property_list():
 					if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
 						dict[prop.name] = pre_pickle(obj.get(prop.name))
@@ -75,7 +90,11 @@ func post_unpickle(obj):
 			if "__class__" in dict:
 				var rc : RegisteredClass = get_by_id(dict["__class__"])
 				dict.erase("__class__")
-				var out = rc.class_def.new()
+				var out = null 
+				if rc.custom_class_def != null:
+					out = rc.custom_class_def.new()
+				else:
+					out = ClassDB.instantiate(rc.name)
 				if out.has_method("__setstate__"):
 					out.__setstate__(dict)
 				else:

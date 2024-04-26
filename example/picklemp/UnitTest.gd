@@ -6,13 +6,16 @@ extends Control
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pickler.register_class(CustomClassOne)
-	pickler.register_class(CustomClassTwo)
-	
+	#print("class list: ", ClassDB.get_class_list())
+	pickler.register_custom_class(CustomClassOne)
+	pickler.register_custom_class(CustomClassTwo)
+	pickler.register_native_class("SurfaceTool")
 	
 	var some_gdscript_data = {
 		"one": CustomClassOne.new(),
-		"two": CustomClassTwo.new()
+		"two": CustomClassTwo.new(),
+		"native": Vector3(0,1,2),
+		"nativeobj": SurfaceTool.new(),
 	}
 	some_gdscript_data["one"].foo = 2.0
 	some_gdscript_data["two"].qux = "r"
@@ -31,14 +34,14 @@ func _ready():
 	# people play games for mastery, connection, or expression
 	# survival, villagers, techbuilds
 	var post = pickler.post_unpickle(pre)
-	print(post)
+	#print(post)
 	
 	var pickle = pickler.pickle(some_gdscript_data)
 	print("pickle size: ", len(pickle))
-	print(pickle)
+	#print(pickle)
 	var unpickle = pickler.unpickle(pickle)
 	
-	print(unpickle)
+	#print(unpickle)
 	
 	#print('me: %s' % [ CustomClassOne ])
 	##print('name: %s' % [ CustomClassOne.name ])
