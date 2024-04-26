@@ -51,10 +51,6 @@ func register(behavior: RegisteredBehavior):
 				)
 			)
 			next_available_id += 1
-		# TODO: move to block registry
-		if next_available_id >= 256:
-			print("Can't add more than 256 types so far. Go bug a developer.")
-			return null
 		behavior.id = next_available_id
 		next_available_id += 1
 		name_to_id[behavior.name] = behavior.id
