@@ -14,6 +14,8 @@ func _ready():
 	var some_gdscript_data = {
 		"one": CustomClassOne.new(),
 		"two": CustomClassTwo.new(),
+		3: CustomClassTwo.new(),
+		"json_things": ["str", 42, {"foo":"bar"}, [1,2,3], true, false, null],
 		"native": Vector3(0,1,2),
 		"nativeobj": SurfaceTool.new(),
 	}
@@ -41,9 +43,9 @@ func _ready():
 	#print(pickle)
 	var unpickle = pickler.unpickle(pickle)
 	
-	#print(unpickle)
+	print(unpickle)
 	
-	#print('me: %s' % [ CustomClassOne ])
+	print('me: %s' % [ CustomClassOne ])
 	##print('name: %s' % [ CustomClassOne.name ])
 	#print('script path: %s' % [ CustomClassOne.resource_path ])
 	#print('script filename: %s' % [ CustomClassOne.resource_path.get_file() ])

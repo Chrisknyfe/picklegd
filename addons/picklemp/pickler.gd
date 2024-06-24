@@ -39,6 +39,9 @@ func pre_pickle(obj):
 			var out = {}
 			var d : Dictionary = obj as Dictionary
 			for key in d:
+				# key must be a string
+				if typeof(key) != TYPE_STRING:
+					push_warning("dict key must be a string: " + str(key), " is a " + str(typeof(key)))
 				out[key] = pre_pickle(d[key])
 			return out
 		TYPE_ARRAY:
