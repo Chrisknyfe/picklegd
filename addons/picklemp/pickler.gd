@@ -4,6 +4,7 @@ class_name Pickler
 """Registry of all pickleable objects"""
 
 @export var preregistry: Array = []
+@export var strict_dictionary_keys = true
 
 class RegisteredClass extends RegisteredBehavior:
 	var custom_class_def: Object
@@ -40,8 +41,9 @@ func pre_pickle(obj):
 			var d : Dictionary = obj as Dictionary
 			for key in d:
 				# key must be a string
-				if typeof(key) != TYPE_STRING:
-					push_warning("dict key must be a string: " + str(key), " is a " + str(typeof(key)))
+				if typeof(key) != TYPE_STRING and strict_dictionary_keys:
+					push_error("dict key must be a string: " + str(key), " is a " + str(typeof(key)))
+					return null
 				out[key] = pre_pickle(d[key])
 			return out
 		TYPE_ARRAY:
@@ -90,6 +92,14 @@ func post_unpickle(obj):
 			var dict : Dictionary = obj as Dictionary
 			for key in dict:
 				dict[key] = post_unpickle(dict[key])
+				
+			# enforce string-only dict keys
+			if strict_dictionary_keys:
+				for key in dict:
+					if typeof(key) != TYPE_STRING:
+						push_error("dict key must be a string: " + str(key), " is a " + str(typeof(key)))
+						return null 
+				
 			if "__class__" in dict:
 				var rc : RegisteredClass = get_by_id(dict["__class__"])
 				dict.erase("__class__")

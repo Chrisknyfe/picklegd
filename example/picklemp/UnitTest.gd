@@ -28,6 +28,9 @@ func _ready():
 	var s = JSON.stringify(pre, "    ")
 	print(s)
 	
+	var json_loaded = JSON.parse_string(s)
+	print(json_loaded)
+	
 	# TODO:
 	# - pickle_json
 	# - pickle (bytes)
@@ -54,6 +57,26 @@ func _ready():
 	#
 	#var message = "This is a test message."
 	#print_debug('%s "%s": %s' % [ self, name, message ])
+	
+	# test filtering bad dict keys in preprocessing first
+	var bad_pickle = pickler.pre_pickle({
+		"foo": "bar",
+		3: "baz",
+	})
+	print("bad_pickle ", bad_pickle, " ", typeof(bad_pickle))
+	
+	# test filtering bad dict keys in post
+	pickler.strict_dictionary_keys = false
+	var bad_pickle2 = pickler.pre_pickle({
+		"foo": "bar",
+		3: "baz",
+	})
+	print("bad_pickle 2 ", bad_pickle2, " ", typeof(bad_pickle2))
+	
+	pickler.strict_dictionary_keys = true
+	var bad_unpickle2 = pickler.post_unpickle(bad_pickle2)
+	print("bad_unpickle2 ", bad_unpickle2, " ", typeof(bad_unpickle2))
+	
 	
 	await get_tree().create_timer(1).timeout
 	get_tree().quit()
