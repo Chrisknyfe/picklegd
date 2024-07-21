@@ -23,6 +23,22 @@ func register_native_class(cls_name: String):
 	rc.custom_class_def = null
 	register(rc)
 	
+func pickle_json(obj) -> String:
+	if strict_dictionary_keys:
+		return JSON.stringify(pre_pickle(obj))
+	else:
+		push_error("Cannot pickle json without strict key checking")
+		return ""
+		
+func unpickle_json(json: String):
+	if strict_dictionary_keys:
+		return post_unpickle(JSON.parse_string(json))
+	else:
+		push_error("Cannot unpickle json without strict key checking")
+		return null
+	
+		
+	
 func pickle(obj) -> PackedByteArray:
 	return var_to_bytes(pre_pickle(obj))
 

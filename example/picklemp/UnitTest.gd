@@ -78,5 +78,17 @@ func _ready():
 	print("bad_unpickle2 ", bad_unpickle2, " ", typeof(bad_unpickle2))
 	
 	
+	# Pickle / unpickle json
+	var jpobj = {
+		"foo": 21,
+		"bar": 22
+	}
+	var jp = pickler.pickle_json(jpobj)
+	var unjpobj = pickler.unpickle_json(jp)
+	
+	print("jp object: ", jpobj)
+	print("jp: ", jp)
+	print("unpickled jp: ", unjpobj)
+	
 	await get_tree().create_timer(1).timeout
 	get_tree().quit()
