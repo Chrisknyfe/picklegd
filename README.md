@@ -4,7 +4,6 @@ including custom classes, over multiplayer and to disk.
 
 
 # TODO
-+ verify we can pickle to and from bytes
-- do I need to pickle to a file?
-- do I need to pickle to json?
-- should I enforce that dictionary keys should only be either strings or integers?
+- pickle to file. both binary and json.
+- unit tests should be more structured.
+- GDUnit?

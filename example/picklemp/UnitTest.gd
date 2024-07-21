@@ -90,5 +90,9 @@ func _ready():
 	print("jp: ", jp)
 	print("unpickled jp: ", unjpobj)
 	
+	pickler.strict_dictionary_keys = false
+	jp = pickler.pickle_json(jpobj)
+	print("jp should throw error with no strict: \"", jp, "\"")
+	
 	await get_tree().create_timer(1).timeout
 	get_tree().quit()
