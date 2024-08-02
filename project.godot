@@ -17,4 +17,8 @@ config/icon="res://icon.svg"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/picklemp/plugin.cfg")
+enabled=PackedStringArray("res://addons/picklemp/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
+
+[gdunit4]
+
+ui/toolbar/run_overall=true
