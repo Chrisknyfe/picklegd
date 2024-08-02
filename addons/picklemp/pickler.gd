@@ -14,14 +14,14 @@ func register_custom_class(c: Script):
 	var rc = RegisteredClass.new()
 	rc.name = c.resource_path
 	rc.custom_class_def = c
-	register(rc)
+	return register(rc)
 
 func register_native_class(cls_name: String):
 	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
 	var rc = RegisteredClass.new()
 	rc.name = cls_name
 	rc.custom_class_def = null
-	register(rc)
+	return register(rc)
 	
 func pickle_json(obj) -> String:
 	if strict_dictionary_keys:

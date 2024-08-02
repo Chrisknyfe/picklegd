@@ -27,8 +27,8 @@ func _ready():
 func register(behavior: RegisteredBehavior):
 	# Insert block type into the library
 	if not behavior.name:
-		print("Cannot register with empty name")
-		return
+		push_error("Cannot register with empty name")
+		return null
 
 	# if association exists, just use that id
 	if behavior.name in name_to_id:
@@ -63,6 +63,7 @@ func register(behavior: RegisteredBehavior):
 		return null
 	by_name[behavior.name] = behavior
 	by_id[behavior.id] = behavior
+	return behavior
 
 
 func get_by_name(behavior_name: String):

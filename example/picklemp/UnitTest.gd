@@ -32,8 +32,6 @@ func _ready():
 	print(json_loaded)
 	
 	# TODO:
-	# - pickle_json
-	# - pickle (bytes)
 	# - gzip the bytes
 	
 	# people play games for mastery, connection, or expression
