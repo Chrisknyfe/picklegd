@@ -7,13 +7,13 @@ var volatile_int: int = 3
 
 func __getstate__():
 	var state = {
-		1: baz,
-		2: qux
+		"1": baz,
+		"2": qux
 	}
 	volatile_int = -1
 	return state
 	
 func __setstate__(state: Dictionary):
-	baz = state[1]
-	qux = state[2]
+	baz = state["1"]
+	qux = state["2"]
 	volatile_int = 99

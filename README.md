@@ -5,5 +5,4 @@ including custom classes, over multiplayer and to disk.
 
 # TODO
 - pickle to file. both binary and json.
-- unit tests should be more structured.
-- GDUnit?
+- register inner classes with a __classname__ variable
