@@ -15,6 +15,9 @@ func register_custom_class(c: Script):
 	rc.name = c.resource_path
 	rc.custom_class_def = c
 	return register(rc)
+	
+func has_custom_class(c: Script):
+	return has_by_name(c.resource_path)
 
 func register_native_class(cls_name: String):
 	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
@@ -22,6 +25,9 @@ func register_native_class(cls_name: String):
 	rc.name = cls_name
 	rc.custom_class_def = null
 	return register(rc)
+	
+func has_native_class(cls_name: String):
+	return has_by_name(cls_name)
 	
 func pickle_json(obj) -> String:
 	if strict_dictionary_keys:
@@ -58,7 +64,7 @@ func pre_pickle(obj):
 			for key in d:
 				# key must be a string
 				if typeof(key) != TYPE_STRING and strict_dictionary_keys:
-					push_error("dict key must be a string: " + str(key), " is a " + str(typeof(key)))
+					push_error("dict key must be a string: param " + str(key), " is of type " + str(typeof(key)))
 					return null
 				out[key] = pre_pickle(d[key])
 			return out
