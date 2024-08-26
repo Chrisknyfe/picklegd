@@ -98,3 +98,21 @@ func test_pickle_json():
 	var j2 = _pickler.pickle_json(_data)
 	assert_str(j2).is_empty()
 	
+func test_pickle_filtering():
+	var j = _pickler.pre_pickle(_data)
+	assert_that(j["one"]).is_null()
+	assert_that(j["two"]).is_null()
+	assert_that(j["3"]).is_null()
+	assert_array(j["json_things"]).contains_exactly(_data["json_things"])
+	assert_that(j["native"]).is_equal(Vector3(0,1,2))
+	assert_that(j["nativeobj"]).is_null()
+	
+	j["bad_obj"] = {
+		"__class__": 99
+	}
+	
+	var u = _pickler.post_unpickle(j)
+	assert_that(u["bad_obj"]).is_null()
+
+	#assert_error(_pickler.pre_pickle.bind(SurfaceTool.new()))\
+	#.is_push_error('Missing object type in picked data: SurfaceTool')

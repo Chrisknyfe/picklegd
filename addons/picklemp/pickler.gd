@@ -5,6 +5,7 @@ class_name Pickler
 
 @export var preregistry: Array = []
 @export var strict_dictionary_keys = true
+@export var warn_on_missing_key = true
 
 class RegisteredClass extends RegisteredBehavior:
 	var custom_class_def: Object
@@ -85,7 +86,10 @@ func pre_pickle(obj):
 			else:
 				key = obj.get_class()
 			
-			# TODO: option to error, warn, or silent 
+			if not has_by_name(key):
+				if warn_on_missing_key:
+					push_warning("Missing object type in picked data: ", key)
+				return null
 			var rc = get_by_name(key) # will throw error if this doesn't work 
 			
 			var dict = {}
@@ -123,6 +127,10 @@ func post_unpickle(obj):
 						return null 
 				
 			if "__class__" in dict:
+				if not has_by_id(dict["__class__"]):
+					if warn_on_missing_key:
+						push_warning("Missing object type in unpickled data: ", dict["__class__"])
+					return null
 				var rc : RegisteredClass = get_by_id(dict["__class__"])
 				dict.erase("__class__")
 				var out = null 
