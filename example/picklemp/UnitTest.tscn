@@ -14,4 +14,3 @@ script = ExtResource("1_43k5n")
 
 [node name="Pickler" type="Node" parent="."]
 script = ExtResource("2_jywj4")
-preregistry = [null]

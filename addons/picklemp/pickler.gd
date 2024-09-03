@@ -1,25 +1,40 @@
+## A system for serializing and deserializing arbitrary GDScript data.
+##
+## This is a system for "pickling" GDScript objects to byte arrays, using native 
+## var_to_bytes plus some code inspection magic. It's meant to make it easy for 
+## you to send complex data structures (such as large custom classes) over 
+## the network to multiplayer peers, or to create your own save system.
+## @experimental
 extends Registry
 class_name Pickler
 
 """Registry of all pickleable objects"""
 
-@export var preregistry: Array = []
+## Enable strict checking that all dictionary keys are strings.
+## This check is required to pickle to JSON.
 @export var strict_dictionary_keys = true
+
+## Generate warnings when a class is unrecognized during pickling & unpickling.
 @export var warn_on_missing_key = true
 
 class RegisteredClass extends RegisteredBehavior:
 	var custom_class_def: Object
 
+## Register a custom class that can be pickled with this pickler. Returns the 
+## RegisteredBehavior object representing this custom class.
 func register_custom_class(c: Script):
 	"""Register a custom class."""
 	var rc = RegisteredClass.new()
 	rc.name = c.resource_path
 	rc.custom_class_def = c
 	return register(rc)
-	
+
+## Returns true if the custom class is registered with this pickler.
 func has_custom_class(c: Script):
 	return has_by_name(c.resource_path)
 
+## Register a godot engine native class. Returns the 
+## RegisteredBehavior object representing this native class.
 func register_native_class(cls_name: String):
 	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
 	var rc = RegisteredClass.new()
@@ -27,9 +42,11 @@ func register_native_class(cls_name: String):
 	rc.custom_class_def = null
 	return register(rc)
 	
+## Returns true if the native class is registered with this pickler.
 func has_native_class(cls_name: String):
 	return has_by_name(cls_name)
 	
+## Pickle the arbitary GDScript data to a JSON string.
 func pickle_json(obj) -> String:
 	if strict_dictionary_keys:
 		return JSON.stringify(pre_pickle(obj))
@@ -37,6 +54,7 @@ func pickle_json(obj) -> String:
 		push_error("Cannot pickle json without strict key checking")
 		return ""
 		
+## Unpickle the JSON string to arbitrary GDScript data.
 func unpickle_json(json: String):
 	if strict_dictionary_keys:
 		return post_unpickle(JSON.parse_string(json))
@@ -45,13 +63,16 @@ func unpickle_json(json: String):
 		return null
 	
 		
-	
+## Pickle the arbitary GDScript data to a PackedByteArray.
 func pickle(obj) -> PackedByteArray:
 	return var_to_bytes(pre_pickle(obj))
 
+## Unpickle the PackedByteArray to arbitrary GDScript data.
 func unpickle(buffer: PackedByteArray):
 	return post_unpickle(bytes_to_var(buffer))
 
+## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
+## Used by `pickle()` and `pickle_json()`.
 func pre_pickle(obj):
 	"""Recursively pickle all the objects in this arbitrary object hierarchy"""
 	match typeof(obj):
@@ -106,7 +127,10 @@ func pre_pickle(obj):
 		# most objects are just passed through
 		_:
 			return obj
-	
+
+## Post-process recently unpickled arbitrary GDScript data, instantiating custom
+## classes and native classes from the appropriate dictionaries representing them.
+## Used by `unpickle()` and `unpickle_json()`
 func post_unpickle(obj):
 	"""recursively unpickle all objects in this arbitrary object hierarchy."""
 	match typeof(obj):

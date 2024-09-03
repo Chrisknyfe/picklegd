@@ -1,7 +1,7 @@
+## A generic registry. keeps track of a collection of object types (blocks, entities, items etc.)
+
 class_name Registry
 extends Node
-
-## A generic registry. keeps track of a collection of object types (blocks, entities, items etc.)
 
 var next_available_id = 0
 var by_name = {}
