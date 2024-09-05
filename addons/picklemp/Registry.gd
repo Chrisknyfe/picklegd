@@ -57,9 +57,7 @@ func register(behavior: RegisteredBehavior):
 		id_to_name[behavior.id] = behavior.name
 
 	if behavior.name in by_name:
-		print(
-			"Cannot add behavior type, name " + behavior.name + " already in use!"
-		)
+		print("Cannot add behavior type, name " + behavior.name + " already in use!")
 		return null
 	by_name[behavior.name] = behavior
 	by_id[behavior.id] = behavior
@@ -68,14 +66,16 @@ func register(behavior: RegisteredBehavior):
 
 func get_by_name(behavior_name: String):
 	return by_name[behavior_name]
-	
+
+
 func has_by_name(behavior_name: String):
 	return behavior_name in by_name
 
 
 func get_by_id(id: int):
 	return by_id[id]
-	
+
+
 func has_by_id(id: int):
 	return id in by_id
 
@@ -96,22 +96,26 @@ func add_name_to_id_association(behavior_name: String, id: int):
 	if behavior_name in name_to_id:
 		if id != name_to_id[behavior_name]:
 			print(
-				"Cannot associate "
-				+ behavior_name
-				+ " with ID "
-				+ str(id)
-				+ ", name is already bound to ID "
-				+ str(name_to_id[behavior_name])
+				(
+					"Cannot associate "
+					+ behavior_name
+					+ " with ID "
+					+ str(id)
+					+ ", name is already bound to ID "
+					+ str(name_to_id[behavior_name])
+				)
 			)
 		return false
 	if id in id_to_name:
 		print(
-			"Cannot associate "
-			+ behavior_name
-			+ " with ID "
-			+ str(id)
-			+ ", ID is already bound to name "
-			+ id_to_name[id]
+			(
+				"Cannot associate "
+				+ behavior_name
+				+ " with ID "
+				+ str(id)
+				+ ", ID is already bound to name "
+				+ id_to_name[id]
+			)
 		)
 		return false
 	name_to_id[behavior_name] = id

@@ -89,7 +89,6 @@ func test_pickle_json():
 	_pickler.register_custom_class(CustomClassTwo)
 	_pickler.register_native_class("SurfaceTool")
 	var j = _pickler.pickle_json(_data)
-	var u = _pickler.unpickle_json(j)
 	
 	var p_data = JSON.parse_string(j)
 	assert_dict(p_data).contains_same_keys(_data.keys())
