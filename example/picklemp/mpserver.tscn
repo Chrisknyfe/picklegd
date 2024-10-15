@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://bk8xvfhcru0gd"]
+[gd_scene load_steps=4 format=3 uid="uid://bk8xvfhcru0gd"]
 
 [ext_resource type="Texture2D" uid="uid://cgjeeeo3nc5ch" path="res://whitestone_relief.png" id="1_4v0ek"]
 [ext_resource type="Script" path="res://example/picklemp/mpserver.gd" id="1_y4nys"]
+[ext_resource type="PackedScene" uid="uid://boifuflqow5sx" path="res://example/picklemp/picklestudio.tscn" id="3_f6oyp"]
 
-[node name="Mpserver" type="Control"]
+[node name="mptest" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,13 +15,17 @@ script = ExtResource("1_y4nys")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 modulate = Color(0.503057, 0.769011, 1, 1)
+layout_mode = 0
 offset_right = 91.0
 offset_bottom = 91.0
 texture = ExtResource("1_4v0ek")
 
 [node name="Label" type="Label" parent="."]
+layout_mode = 0
 offset_left = 108.0
 offset_top = 25.0
 offset_right = 338.0
 offset_bottom = 82.0
 text = "mpserver scene loaded!"
+
+[node name="picklestudio" parent="." instance=ExtResource("3_f6oyp")]

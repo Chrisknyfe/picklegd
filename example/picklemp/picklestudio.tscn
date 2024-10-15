@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://boifuflqow5sx"]
+
+[ext_resource type="Script" path="res://example/picklemp/picklestudio.gd" id="1_luspn"]
+
+[node name="picklestudio" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 58.0
+offset_top = 107.0
+offset_right = 755.0
+offset_bottom = 592.0
+script = ExtResource("1_luspn")
+
+[node name="textbox" type="TextEdit" parent="."]
+layout_mode = 2
+offset_left = 17.0
+offset_top = 105.0
+offset_right = 334.0
+offset_bottom = 216.0
+size_flags_horizontal = 3
+placeholder_text = "o' sphinx of black quartz, judge my vow"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 44.0
+offset_right = 104.0
+offset_bottom = 74.0
+text = "Send!"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
