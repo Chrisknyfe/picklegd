@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxpkfwqfgxxhk"]
+
+[ext_resource type="Script" path="res://example/picklemp/mpclient.gd" id="1_3rmem"]
+[ext_resource type="Texture2D" uid="uid://cgjeeeo3nc5ch" path="res://whitestone_relief.png" id="1_ji8x3"]
+
+[node name="Mpclient" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3rmem")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color(1, 0.658824, 0, 1)
+layout_mode = 0
+offset_right = 91.0
+offset_bottom = 91.0
+texture = ExtResource("1_ji8x3")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 25.0
+offset_right = 338.0
+offset_bottom = 82.0
+text = "mpclient scene loaded!"

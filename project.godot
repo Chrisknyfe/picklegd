@@ -11,13 +11,19 @@ config_version=5
 [application]
 
 config/name="Picklemp"
-run/main_scene="res://example/picklemp/UnitTest.tscn"
+run/main_scene="res://example/picklemp/mpstart.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[debug]
+
+multirun/number_of_windows=2
+multirun/add_custom_args=true
+multirun/window_args=["listen", "join"]
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg", "res://addons/picklemp/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg", "res://addons/multirun/plugin.cfg", "res://addons/picklemp/plugin.cfg")
 
 [gdunit4]
 
