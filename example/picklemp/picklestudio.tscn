@@ -28,4 +28,25 @@ offset_right = 104.0
 offset_bottom = 74.0
 text = "Send!"
 
+[node name="HScrollBar" type="HScrollBar" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 229.0
+offset_right = 338.0
+offset_bottom = 237.0
+
+[node name="CheckButton" type="CheckButton" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 244.0
+offset_right = 58.0
+offset_bottom = 268.0
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 277.0
+offset_right = 88.0
+offset_bottom = 308.0
+
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
