@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dly1v113v4y55"
-path="res://.godot/imported/picklejar.svg-2370adb00a911a1e915b7cccd24cabfb.ctex"
+uid="uid://crwhf13klrpqb"
+path="res://.godot/imported/pickle_nojar.svg-47893a8752bf2261f5072615bb1eddd8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/picklemp/picklejar.svg"
-dest_files=["res://.godot/imported/picklejar.svg-2370adb00a911a1e915b7cccd24cabfb.ctex"]
+source_file="res://addons/picklemp/pickle_nojar.svg"
+dest_files=["res://.godot/imported/pickle_nojar.svg-47893a8752bf2261f5072615bb1eddd8.ctex"]
 
 [params]
 

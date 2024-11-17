@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="16"
+   viewBox="0 0 16 16"
+   width="16"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="pickle_nojar.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   inkscape:export-filename="picklejar_pickle.png"
+   inkscape:export-xdpi="1536"
+   inkscape:export-ydpi="1536"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8">
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#77ce57;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#aee2a2;stop-opacity:1;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="0.38229144"
+       y1="8.1178882"
+       x2="15.754183"
+       y2="8.1178882"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     id="namedview6"
+     showgrid="true"
+     inkscape:zoom="20.85965"
+     inkscape:cx="1.462153"
+     inkscape:cy="7.1669467"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4520"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
+  </sodipodi:namedview>
+  <path
+     style="fill:url(#linearGradient2);stroke-linecap:round"
+     d="M 13.78595,0.4747418 C 11.764512,-0.18420462 9.761098,1.0896651 9.1019266,3.1110302 8.8835339,3.7815137 7.8134762,5.2610008 6.7071306,6.4176708 5.600785,7.5743408 3.8962609,8.1825219 3.2021319,8.3756952 1.1528517,8.9453621 -0.04620961,11.068863 0.52439752,13.117882 1.0949233,15.166373 3.2181545,16.364408 5.266585,15.793664 c 2.7440923,-0.76367 4.882958,-2.426852 6.666016,-4.291016 1.783057,-1.8641635 2.749068,-3.8845953 3.506587,-6.210242 0.657674,-2.0208421 0.36711,-4.1584734 -1.653238,-4.8176642 z"
+     id="path816"
+     sodipodi:nodetypes="ccscccscc" />
+  <ellipse
+     style="fill:#77ce57;fill-opacity:1;stroke:none;stroke-width:3.92162;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path818-4-8-1-2-7"
+     cx="5.7308841"
+     cy="7.5923648"
+     rx="1.5150473"
+     ry="1.5016216"
+     inkscape:transform-center-x="-0.047939417"
+     inkscape:transform-center-y="0.095878868" />
+  <ellipse
+     style="fill:#77ce57;fill-opacity:1;stroke:none;stroke-width:3.92162;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path818-4-8-1-7-4-1"
+     cx="13.691048"
+     cy="7.5599065"
+     rx="1.5150473"
+     ry="1.5016216" />
+  <ellipse
+     style="fill:#77ce57;fill-opacity:1;stroke:none;stroke-width:3.92162;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path818-4-8-1-5-5-1"
+     cy="12.452212"
+     cx="9.7150717"
+     rx="1.5150473"
+     ry="1.5016216" />
+</svg>

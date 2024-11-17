@@ -4,4 +4,5 @@
 - gzip
 - make sure I can import the library into my game without needing gdunit4 or any 
 	other dependencies.
-- a multiplayer test script
+- rename the plugin to "PickleGD"
+- rename the pickler object to "picklejar"

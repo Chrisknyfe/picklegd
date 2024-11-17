@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dcau7piafrpib"]
 
 [ext_resource type="Script" path="res://example/picklemp/mpstart.gd" id="1_i4us2"]
-[ext_resource type="Texture2D" uid="uid://dly1v113v4y55" path="res://addons/picklemp/picklejar.svg" id="2_03ebl"]
+[ext_resource type="Texture2D" uid="uid://b857om1gh8ul5" path="res://addons/picklemp/picklejar_pickle_fancy.svg" id="2_s0fid"]
 [ext_resource type="PackedScene" uid="uid://boifuflqow5sx" path="res://example/picklemp/picklestudio.tscn" id="3_6yt05"]
 
 [node name="Mpstart" type="Control"]
@@ -19,7 +19,7 @@ texture_filter = 1
 layout_mode = 0
 offset_right = 139.0
 offset_bottom = 139.0
-texture = ExtResource("2_03ebl")
+texture = ExtResource("2_s0fid")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
