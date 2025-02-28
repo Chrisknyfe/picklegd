@@ -23,7 +23,7 @@ multirun/window_args=["listen", "join"]
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/multirun/plugin.cfg", "res://addons/picklemp/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
+enabled=PackedStringArray("res://addons/multirun/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
 
 [gdunit4]
 

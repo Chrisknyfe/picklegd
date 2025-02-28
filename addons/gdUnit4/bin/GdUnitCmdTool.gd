@@ -312,12 +312,12 @@ class CLIRunner:
 		commands.append_array(result.value() as Array)
 		result = (
 			CmdCommandHandler.new(_cmd_options)
-				.register_cb("-help", Callable(self, "show_help"))
-				.register_cb("--help-advanced", Callable(self, "show_advanced_help"))
-				.register_cb("-a", Callable(_runner_config, "add_test_suite"))
-				.register_cbv("-a", Callable(_runner_config, "add_test_suites"))
-				.register_cb("-i", Callable(_runner_config, "skip_test_suite"))
-				.register_cbv("-i", Callable(_runner_config, "skip_test_suites"))
+				.register_cb("-help", show_help)
+				.register_cb("--help-advanced", show_advanced_help)
+				.register_cb("-a", _runner_config.add_test_suite)
+				.register_cbv("-a", _runner_config.add_test_suites)
+				.register_cb("-i", _runner_config.skip_test_suite)
+				.register_cbv("-i", _runner_config.skip_test_suites)
 				.register_cb("-rd", set_report_dir)
 				.register_cb("-rc", set_report_count)
 				.register_cb("--selftest", run_self_test)
@@ -376,9 +376,9 @@ class CLIRunner:
 		var ts_scanner := GdUnitTestSuiteScanner.new()
 		for as_resource_path in to_execute.keys() as Array[String]:
 			var selected_tests: PackedStringArray = to_execute.get(as_resource_path)
-			var scaned_suites := ts_scanner.scan(as_resource_path)
-			skip_test_case(scaned_suites, selected_tests)
-			test_suites_to_process.append_array(scaned_suites)
+			var scanned_suites := ts_scanner.scan(as_resource_path)
+			skip_test_case(scanned_suites, selected_tests)
+			test_suites_to_process.append_array(scanned_suites)
 		skip_suites(test_suites_to_process, config)
 		return test_suites_to_process
 
@@ -397,7 +397,7 @@ class CLIRunner:
 		var skipped := config.skipped()
 		if skipped.is_empty():
 			return
-		_console.prints_warning("Found excluded test suite's configured at '%s'" % _runner_config_file)
+
 		for test_suite in test_suites:
 			# skipp c# testsuites for now
 			if test_suite.get_script() == null:
@@ -407,23 +407,23 @@ class CLIRunner:
 
 	# Dictionary[String, PackedStringArray]
 	func skip_suite(test_suite: Node, skipped: Dictionary) -> void:
-		var skipped_suites :Array[String] = skipped.keys()
+		var skipped_suites :Array = skipped.keys()
 		var suite_name := test_suite.get_name()
 		var test_suite_path: String = (
 			test_suite.get_meta("ResourcePath") if test_suite.get_script() == null
 			else test_suite.get_script().resource_path
 		)
-		for suite_to_skip in skipped_suites:
+		for suite_to_skip: String in skipped_suites:
 			# if suite skipped by path or name
 			if (
 				suite_to_skip == test_suite_path
 				or (suite_to_skip.is_valid_filename() and suite_to_skip == suite_name)
 			):
-				var skipped_tests: Array[String] = skipped.get(suite_to_skip)
-				var skip_reason := "Excluded by config '%s'" % _runner_config_file
+				var skipped_tests: PackedStringArray = skipped.get(suite_to_skip)
+				var skip_reason := "Excluded by configuration"
 				# if no tests skipped test the complete suite is skipped
 				if skipped_tests.is_empty():
-					_console.prints_warning("Mark test suite '%s' as skipped!" % suite_to_skip)
+					_console.prints_warning("Mark the entire test suite '%s' as skipped!" % test_suite_path)
 					@warning_ignore("unsafe_property_access")
 					test_suite.__is_skipped = true
 					@warning_ignore("unsafe_property_access")
