@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://boifuflqow5sx"]
 
-[ext_resource type="Script" path="res://example/picklemp/picklestudio.gd" id="1_luspn"]
+[ext_resource type="Script" uid="uid://2xu2806q4v8d" path="res://example/picklemp/picklestudio.gd" id="1_luspn"]
 
 [node name="picklestudio" type="Control"]
 layout_mode = 3
