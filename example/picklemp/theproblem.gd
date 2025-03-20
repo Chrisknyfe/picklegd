@@ -12,8 +12,8 @@ func _ready():
 	#why_var_to_bytes_is_unsafe()
 	#var_to_str_with_inline_class()
 	why_resourcesaver_is_unsafe()
-	await get_tree().create_timer(5)
-	print("End.")
+	await get_tree().create_timer(1).timeout
+	get_tree().quit()
 	
 	
 func why_resourcesaver_is_unsafe():
