@@ -18,6 +18,7 @@ extends Registry
 @export var warn_on_missing_key = true
 
 
+## A class registered with the pickler.
 class RegisteredClass:
 	extends RegisteredBehavior
 	var custom_class_def: Object
@@ -126,7 +127,7 @@ func pre_pickle(obj):
 					push_warning("Missing object type in picked data: ", key)
 				retval = null
 			else:
-				var rc = get_by_name(key)  # will throw error if this doesn't work
+				var rc: RegisteredClass = get_by_name(key)  # will throw error if this doesn't work
 
 				var dict = {}
 				if obj.has_method("__getstate__"):

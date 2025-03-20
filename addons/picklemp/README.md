@@ -44,4 +44,7 @@ var pba: PackedByteArray = pickler.pickle(data)
 var unpickled = pickler.unpickle(pba)
 ```
 
-# API Docs
+# Why do I need this plugin
+
+Loading custom classes and resources using var_to_str, var_to_bytes_with_objects,
+and ResourceLoader.load can allow execution of malicious code. See res://example/picklemp/theproblem.tscn

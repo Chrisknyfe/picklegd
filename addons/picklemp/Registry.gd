@@ -1,17 +1,26 @@
-## A generic registry. keeps track of a collection of object types (blocks, entities, items etc.)
+## A generic registry which keeps track of a collection of RegisteredBehaviors.
+## Can be used to store, for example, weapon types for your game. Or to register custom class types.
+## Inherit from RegisteredBehavior to customize they types you are storing.
 
 class_name Registry
 extends Node
 
+## The next ID that will be used when a new class is registered.
 var next_available_id = 0
+
+## Mapping from names to ID's.
 var by_name = {}
+## Mapping from ID's to names.
 var by_id = {}
 
-# Stores mapping of names to ID's, for when older maps are loaded and conflicts need to be resolved.
+## Stores mapping of names to numeric ID's, for when older maps are loaded
+## and conflicts need to be resolved.
 var name_to_id = {}
+## Stores mapping of numeric ID's to names.
 var id_to_name = {}
 
 
+## Clears all RegisteredBehaviors from this Registry.
 func clear():
 	next_available_id = 0
 	by_name.clear()
@@ -24,13 +33,18 @@ func _ready():
 	clear()
 
 
+## Register a RegisteredBehavior with this registry, which can later be retrieved by name or ID.
 func register(behavior: RegisteredBehavior):
-	# Insert block type into the library
+	# First make sure we can register with this name
 	if not behavior.name:
 		push_error("Cannot register with empty name")
 		return null
+	if behavior.name in by_name:
+		print("Cannot add behavior type, name " + behavior.name + " already in use!")
+		return null
+	by_name[behavior.name] = behavior
 
-	# if association exists, just use that id
+	# Find the ID for this name, or get a new ID if there isn't one already.
 	if behavior.name in name_to_id:
 		print(
 			"found associated id {0} for behavior {1}".format(
@@ -55,41 +69,53 @@ func register(behavior: RegisteredBehavior):
 		next_available_id += 1
 		name_to_id[behavior.name] = behavior.id
 		id_to_name[behavior.id] = behavior.name
-
-	if behavior.name in by_name:
-		print("Cannot add behavior type, name " + behavior.name + " already in use!")
-		return null
-	by_name[behavior.name] = behavior
 	by_id[behavior.id] = behavior
 	return behavior
 
 
+## Get a RegisteredBehavior by looking up its name.
 func get_by_name(behavior_name: String):
 	return by_name[behavior_name]
 
 
+## See if this registry has a RegisteredBehavior by looking up its name.
 func has_by_name(behavior_name: String):
 	return behavior_name in by_name
 
 
+## Get a RegisteredBehavior by looking up its numeric ID.
 func get_by_id(id: int):
 	return by_id[id]
 
 
+## See if this registry has a RegisteredBehavior by looking up its numeric ID.
 func has_by_id(id: int):
 	return id in by_id
 
 
-# Before registering types, these associations should be loaded first. Either from:
-# - a multiplayer server (if we are the client)
-# - a save file (if we are loading a save in singleplayer or as a server)
-#
 # TODO: allow the ability to override associations after registering content.
+## Add a previously-defined set of associations between a name and a numeric ID.
+##
+## Use this when you have a set of RegisteredBehaviors that must remain backwards compatible
+## as you update your game with new RegisteredBehaviors. Get the list of associations with
+## get_associations(), save them to file, then load them later into this function.
+##
+## `assoc` should be keyed by name, with numeric ID's as values.
+## Returns whether all associations were stored without errors.
 func add_name_to_id_associations(assoc: Dictionary):
+	var retval = true
 	for behavior_name in assoc:
-		add_name_to_id_association(behavior_name, assoc[behavior_name])
+		if not add_name_to_id_association(behavior_name, assoc[behavior_name]):
+			retval = false
+	return retval
 
 
+## Add a previously-defined association between a name and a numeric ID.
+##
+## Use this when you have a set of RegisteredBehaviors that must remain backwards compatible
+## as you update your game with new RegisteredBehaviors.
+##
+## Returns whether the association was stored without errors.
 func add_name_to_id_association(behavior_name: String, id: int):
 	print("Loading association: " + behavior_name + " ==> " + str(id))
 
@@ -120,12 +146,17 @@ func add_name_to_id_association(behavior_name: String, id: int):
 		return false
 	name_to_id[behavior_name] = id
 	id_to_name[id] = behavior_name
+	return true
 
 
+## Get the name-to-ID associations for all RegisteredBehaviors
+## Use this when you have a set of RegisteredBehaviors that must remain backwards compatible
+## as you update your game with new RegisteredBehaviors. Save these associations to file,
+## then load them later with add_name_to_id_associations().
 func get_associations():
 	return name_to_id
 
 
 func finalize():
-	# TODO: ensure all registered types have associations
+	# TODO: ensure all name-to-ID associations have RegisteredBehaviors
 	pass

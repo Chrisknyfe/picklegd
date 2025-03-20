@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dxfyj1ha3d7sv"]
 
-[ext_resource type="Script" uid="uid://sn1dg1pylep7" path="res://example/picklemp/theproblem.gd" id="1_vxacj"]
+[ext_resource type="Script" path="res://example/picklemp/theproblem.gd" id="1_vxacj"]
 
 [sub_resource type="GDScript" id="GDScript_txgt8"]
 

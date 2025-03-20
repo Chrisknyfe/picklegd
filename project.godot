@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Picklemp"
-run/main_scene="res://example/picklemp/theproblem.tscn"
-config/features=PackedStringArray("4.4", "Forward Plus")
+run/main_scene="res://example/picklemp/mpstart.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
 [debug]

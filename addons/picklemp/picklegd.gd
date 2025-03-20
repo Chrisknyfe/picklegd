@@ -7,7 +7,7 @@ func _enter_tree():
 		"Pickler",
 		"Node",
 		preload("res://addons/picklemp/pickler.gd"),
-		preload("res://addons/picklemp/picklejar_pickle.svg")
+		preload("res://addons/picklemp/picklejar_pickle_fancy.svg")
 	)
 
 
