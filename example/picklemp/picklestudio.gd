@@ -11,8 +11,8 @@ func _ready():
 	$HScrollBar.value = form.num_sheep
 	$CheckButton.button_pressed = form.is_reticulated
 	$ColorPickerButton.color = form.albedo
-	if typeof("asdf") == TYPE_STRING:
-		pass
+	
+	$Label.text = "Pickle size (bytes): " + str(len(pickled_data))
 
 
 func _on_button_pressed() -> void:
@@ -21,4 +21,18 @@ func _on_button_pressed() -> void:
 	form.num_sheep = $HScrollBar.value
 	form.is_reticulated = $CheckButton.button_pressed
 	form.albedo = $ColorPickerButton.color
-	send_pickle.rpc(pickler.pickle(form))
+	var p = pickler.pickle(form)
+	$Label.text = "Pickle size (bytes): " + str(len(p))
+	send_pickle.rpc(p)
+
+
+func _on_double_button_pressed():
+	# double it!
+	var text = $textbox.text
+	$textbox.text = text + ' ' + text
+	_on_button_pressed()
+
+
+func _on_clear_button_pressed():
+	$textbox.text = ""
+	_on_button_pressed()

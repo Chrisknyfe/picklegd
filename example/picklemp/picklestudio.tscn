@@ -11,6 +11,14 @@ offset_right = 755.0
 offset_bottom = 592.0
 script = ExtResource("1_luspn")
 
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 7.0
+offset_right = 56.0
+offset_bottom = 30.0
+text = "Pickle size (bytes): 0"
+
 [node name="textbox" type="TextEdit" parent="."]
 layout_mode = 2
 offset_left = 17.0
@@ -20,13 +28,27 @@ offset_bottom = 216.0
 size_flags_horizontal = 3
 placeholder_text = "o' sphinx of black quartz, judge my vow"
 
-[node name="Button" type="Button" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 44.0
-offset_right = 104.0
-offset_bottom = 74.0
+offset_left = 15.0
+offset_top = 41.0
+offset_right = 387.0
+offset_bottom = 81.0
+
+[node name="Button" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Send!"
+
+[node name="DoubleButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Double It!!"
+
+[node name="ClearButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Clear"
 
 [node name="HScrollBar" type="HScrollBar" parent="."]
 layout_mode = 0
@@ -49,4 +71,6 @@ offset_top = 277.0
 offset_right = 88.0
 offset_bottom = 308.0
 
-[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/DoubleButton" to="." method="_on_double_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/ClearButton" to="." method="_on_clear_button_pressed"]
