@@ -3,7 +3,7 @@
 ## Inherit from RegisteredBehavior to customize they types you are storing.
 
 class_name Registry
-extends Node
+extends RefCounted
 
 ## The next ID that will be used when a new class is registered.
 var next_available_id = 0
@@ -29,7 +29,7 @@ func clear():
 	id_to_name.clear()
 
 
-func _ready():
+func _init():
 	clear()
 
 
@@ -155,8 +155,3 @@ func add_name_to_id_association(behavior_name: String, id: int):
 ## then load them later with add_name_to_id_associations().
 func get_associations():
 	return name_to_id
-
-
-func finalize():
-	# TODO: ensure all name-to-ID associations have RegisteredBehaviors
-	pass
