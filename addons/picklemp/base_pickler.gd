@@ -49,7 +49,7 @@ func unpickle(buffer: PackedByteArray):
 
 ## Get an ID for this object's class. Defaults to returning the obj's class name
 func get_object_class_id(obj: Object):
-	# return null or some other falsey variant if you don't want this object pickled
+	# return null if you don't want this object pickled
 	var scr = obj.get_script()
 	if scr != null:
 		return scr.get_global_name()
@@ -105,7 +105,7 @@ func pre_pickle(obj):
 		TYPE_OBJECT:
 			var obj_class_id = get_object_class_id(obj)
 
-			if not obj_class_id:
+			if obj_class_id == null:
 				if warn_on_missing_key:
 					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
@@ -157,7 +157,7 @@ func post_unpickle(obj):
 				retval = null
 			elif "__class__" in dict:
 				var out = instantiate_from_class_id(dict["__class__"])
-				if not out:
+				if out == null:
 					if warn_on_missing_key:
 						push_warning("Cannot instantiate from class ID: ", dict["__class__"])
 					return null
