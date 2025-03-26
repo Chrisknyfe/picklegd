@@ -4,11 +4,14 @@
 ## var_to_bytes plus some code inspection magic. It's meant to make it easy for
 ## you to send complex data structures (such as large custom classes) over
 ## the network to multiplayer peers, or to create your own save system.
+##
+## Note: this is a base class which allows all class types to be pickled by
+## default. This is insecure.
 ## @experimental
-class_name Pickler
+class_name BasePickler
 extends RefCounted
 
-"""A data serializer that keeps a Registry of all pickleable objects"""
+"""A data serializer that can process Objects without executing arbitrary code"""
 
 ## Enable strict checking that all dictionary keys are strings.
 ## This check is required to pickle to JSON.
@@ -16,38 +19,6 @@ extends RefCounted
 
 ## Generate warnings when a class is unrecognized during pickling & unpickling.
 @export var warn_on_missing_key = true
-
-var class_registry = Registry.new()
-
-
-## Register a custom class that can be pickled with this pickler. Returns the
-## RegisteredBehavior object representing this custom class.
-func register_custom_class(c: Script):
-	"""Register a custom class."""
-	var rc = RegisteredClass.new()
-	rc.name = c.resource_path
-	rc.custom_class_def = c
-	return class_registry.register(rc)
-
-
-## Returns true if the custom class is registered with this pickler.
-func has_custom_class(c: Script):
-	return class_registry.has_by_name(c.resource_path)
-
-
-## Register a godot engine native class. Returns the
-## RegisteredBehavior object representing this native class.
-func register_native_class(cls_name: String):
-	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
-	var rc = RegisteredClass.new()
-	rc.name = cls_name
-	rc.custom_class_def = null
-	return class_registry.register(rc)
-
-
-## Returns true if the native class is registered with this pickler.
-func has_native_class(cls_name: String):
-	return class_registry.has_by_name(cls_name)
 
 
 ## Pickle the arbitary GDScript data to a JSON string.
@@ -74,6 +45,29 @@ func pickle(obj) -> PackedByteArray:
 ## Unpickle the PackedByteArray to arbitrary GDScript data.
 func unpickle(buffer: PackedByteArray):
 	return post_unpickle(bytes_to_var(buffer))
+
+
+## Get an ID for this object's class. Defaults to returning the obj's class name
+func get_object_class_id(obj: Object):
+	# return null or some other falsey variant if you don't want this object pickled
+	var scr = obj.get_script()
+	if scr != null:
+		return scr.get_global_name()
+	return obj.get_class()
+
+
+## Create an instance of this class from its ID. Defaults to treating the id as a class name.
+func instantiate_from_class_id(id):
+	var str_id = str(id)
+	# return null if you don't want to create an object of this type
+	if ClassDB.class_exists(str_id):
+		return ClassDB.instantiate(str_id)
+	for global_class in ProjectSettings.get_global_class_list():
+		if global_class["class"] == str_id:
+			print("found the global class!: ", global_class)
+			var scr = load(global_class["path"]) as Script
+			return scr.new()
+	return null
 
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
@@ -109,22 +103,13 @@ func pre_pickle(obj):
 			retval = out
 		# Objects - only registered objects get pickled
 		TYPE_OBJECT:
-			#print("pickling object of type: ", obj)
+			var obj_class_id = get_object_class_id(obj)
 
-			var scr = obj.get_script()
-			var key = ""
-			if scr != null:
-				key = scr.resource_path
-			else:
-				key = obj.get_class()
-
-			if not class_registry.has_by_name(key):
+			if not obj_class_id:
 				if warn_on_missing_key:
-					push_warning("Missing object type in picked data: ", key)
+					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
 			else:
-				var rc: RegisteredClass = class_registry.get_by_name(key)
-
 				var dict = {}
 				if obj.has_method("__getstate__"):
 					# gdlint:ignore = private-method-call
@@ -135,7 +120,7 @@ func pre_pickle(obj):
 					for prop in obj.get_property_list():
 						if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
 							dict[prop.name] = pre_pickle(obj.get(prop.name))
-				dict["__class__"] = rc.id
+				dict["__class__"] = obj_class_id
 				retval = dict
 		# most objects are just passed through
 		_:
@@ -171,17 +156,12 @@ func post_unpickle(obj):
 			if failed_strict:
 				retval = null
 			elif "__class__" in dict:
-				if not class_registry.has_by_id(dict["__class__"]):
+				var out = instantiate_from_class_id(dict["__class__"])
+				if not out:
 					if warn_on_missing_key:
-						push_warning("Missing object type in unpickled data: ", dict["__class__"])
+						push_warning("Cannot instantiate from class ID: ", dict["__class__"])
 					return null
-				var rc: RegisteredClass = class_registry.get_by_id(dict["__class__"])
 				dict.erase("__class__")
-				var out = null
-				if rc.custom_class_def != null:
-					out = rc.custom_class_def.new()
-				else:
-					out = ClassDB.instantiate(rc.name)
 				if out.has_method("__setstate__"):
 					# gdlint:ignore = private-method-call
 					out.__setstate__(dict)

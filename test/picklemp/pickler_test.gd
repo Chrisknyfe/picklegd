@@ -24,7 +24,7 @@ func before():
 
 
 func before_test():
-	_pickler.clear()
+	_pickler.class_registry.clear()
 	_pickler.strict_dictionary_keys = true
 
 
@@ -127,8 +127,8 @@ func test_pickle_load_associations() -> void:
 	
 	var p2: Pickler = Pickler.new()
 
-	var assoc = _pickler.get_associations()
-	p2.add_name_to_id_associations(assoc)
+	var assoc = _pickler.class_registry.get_associations()
+	p2.class_registry.add_name_to_id_associations(assoc)
 	p2.register_native_class("SurfaceTool")
 	p2.register_custom_class(CustomClassTwo)
 	p2.register_custom_class(CustomClassOne)
@@ -136,12 +136,10 @@ func test_pickle_load_associations() -> void:
 	assert_that(p2.has_custom_class(CustomClassTwo))
 	assert_that(p2.has_native_class("SurfaceTool"))
 
-	for cls_name in _pickler.by_name:
-		var cls1 = _pickler.get_by_name(cls_name)
-		var cls2 = p2.get_by_name(cls_name)
+	for cls_name in _pickler.class_registry.by_name:
+		var cls1 = _pickler.class_registry.get_by_name(cls_name)
+		var cls2 = p2.class_registry.get_by_name(cls_name)
 		assert_str(cls1.name).is_equal(cls2.name)
 		assert_int(cls1.id).is_equal(cls2.id)
-		
-	p2.queue_free()
 
 	

@@ -9,9 +9,15 @@ class InlineForm extends Object:
 	@export var albedo: Color = Color.BLUE
 
 func _ready():
+	#var pickler = ClassDB.instantiate("Pickler")
+	#print("maybe a pickler?: ", pickler)
+	print(ClassDB.class_exists("CustomClassOne"))
+	print(ClassDB.can_instantiate("CustomClassOne"))
+	#print(ClassDB.get_class_list())
+	#print(ProjectSettings.get_global_class_list())
 	#why_var_to_bytes_is_unsafe()
 	#var_to_str_with_inline_class()
-	why_resourcesaver_is_unsafe()
+	#why_resourcesaver_is_unsafe()
 	await get_tree().create_timer(1).timeout
 	get_tree().quit()
 	
