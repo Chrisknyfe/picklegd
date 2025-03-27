@@ -25,7 +25,6 @@ func before():
 
 func before_test():
 	_pickler.class_registry.clear()
-	_pickler.strict_dictionary_keys = true
 
 
 func test_register_custom_class() -> void:
@@ -65,37 +64,12 @@ func test_pickle_getstate_setstate():
 	var u = _pickler.unpickle(p)
 	assert_int(u.volatile_int).is_equal(99)
 	
-func test_filtering_bad_keys():
-	var questionable_data = {
-		"foo": "bar",
-		3: "baz",
-	}
-	
-	_pickler.strict_dictionary_keys = true
-	var bad_pickle = _pickler.pre_pickle(questionable_data)
-	assert_that(bad_pickle).is_null()
-	var bad_unpickle = _pickler.post_unpickle(questionable_data)
-	assert_that(bad_unpickle).is_null()
-	
-	
-	_pickler.strict_dictionary_keys = false
-	var good_pickle = _pickler.pre_pickle(questionable_data)
-	assert_dict(good_pickle).contains_keys(questionable_data.keys())
-	var good_unpickle = _pickler.post_unpickle(questionable_data)
-	assert_that(good_unpickle).contains_keys(questionable_data.keys())
-	
-func test_pickle_json():
+func test_pickle_str():
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(CustomClassTwo)
 	_pickler.register_native_class("SurfaceTool")
-	var j = _pickler.pickle_json(_data)
-	
-	var p_data = JSON.parse_string(j)
-	assert_dict(p_data).contains_same_keys(_data.keys())
-	
-	_pickler.strict_dictionary_keys = false
-	var j2 = _pickler.pickle_json(_data)
-	assert_str(j2).is_empty()
+	var j = _pickler.pickle_str(_data)
+	var u = _pickler.unpickle_str(j)
 	
 func test_pickle_filtering():
 	var j = _pickler.pre_pickle(_data)

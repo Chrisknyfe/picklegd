@@ -5,36 +5,36 @@
 ## you to send complex data structures (such as large custom classes) over
 ## the network to multiplayer peers, or to create your own save system.
 ##
-## Note: this is a base class which allows all class types to be pickled by
-## default. This is insecure.
+## BasePickler is a base class which allows all class types to be pickled by
+## default. This may be insecure.
 ## @experimental
 class_name BasePickler
 extends RefCounted
 
 """A data serializer that can process Objects without executing arbitrary code"""
 
-## Enable strict checking that all dictionary keys are strings.
-## This check is required to pickle to JSON.
-@export var strict_dictionary_keys = true
+const PROP_WHITELIST: PropertyUsageFlags = (
+	PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_ALWAYS_DUPLICATE
+)
+const PROP_BLACKLIST: PropertyUsageFlags = (
+	PROPERTY_USAGE_INTERNAL
+	| PROPERTY_USAGE_NO_INSTANCE_STATE
+	| PROPERTY_USAGE_NEVER_DUPLICATE
+	| PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT
+)
 
 ## Generate warnings when a class is unrecognized during pickling & unpickling.
-@export var warn_on_missing_key = true
+@export var warn_on_missing_class = true
 
 
-## Pickle the arbitary GDScript data to a JSON string.
-func pickle_json(obj) -> String:
-	if strict_dictionary_keys:
-		return JSON.stringify(pre_pickle(obj))
-	push_error("Cannot pickle json without strict key checking")
-	return ""
+## Pickle the arbitary GDScript data to a string.
+func pickle_str(obj) -> String:
+	return var_to_str(pre_pickle(obj))
 
 
-## Unpickle the JSON string to arbitrary GDScript data.
-func unpickle_json(json: String):
-	if strict_dictionary_keys:
-		return post_unpickle(JSON.parse_string(json))
-	push_error("Cannot unpickle json without strict key checking")
-	return null
+## Unpickle the string to arbitrary GDScript data.
+func unpickle_str(s: String):
+	return post_unpickle(str_to_var(s))
 
 
 ## Pickle the arbitary GDScript data to a PackedByteArray.
@@ -64,16 +64,31 @@ func instantiate_from_class_id(id):
 		return ClassDB.instantiate(str_id)
 	for global_class in ProjectSettings.get_global_class_list():
 		if global_class["class"] == str_id:
-			print("found the global class!: ", global_class)
 			var scr = load(global_class["path"]) as Script
 			return scr.new()
 	return null
+
+
+## Get properties that are safe to pickle for this class.
+## Properties such as the Object's "script" should be filtered out.
+func get_pickleable_properties(obj: Object):
+	var good_props = []
+	print("props for class ", get_object_class_id(obj))
+	for prop in obj.get_property_list():
+		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
+			print("keep prop ", prop.name, " :: ", prop.usage)
+			good_props.append(prop)
+		else:
+			print("---- prop ", prop.name, " :: ", prop.usage)
+	return good_props
 
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
 ## Used by `pickle()` and `pickle_json()`.
 func pre_pickle(obj):
 	"""Recursively pickle all the objects in this arbitrary object hierarchy"""
+	if obj == null:
+		return null
 	var retval = null
 	match typeof(obj):
 		# Rejected types
@@ -85,15 +100,7 @@ func pre_pickle(obj):
 			var d: Dictionary = obj as Dictionary
 			var fail_to_process = false
 			for key in d:
-				# key must be a string
-				if typeof(key) != TYPE_STRING and strict_dictionary_keys:
-					push_error(
-						"dict key must be a string: param " + str(key),
-						" is of type " + str(typeof(key))
-					)
-					out = null  # invalidate entire dictionary
-				else:
-					out[key] = pre_pickle(d[key])
+				out[key] = pre_pickle(d[key])
 			retval = out
 		TYPE_ARRAY:
 			var out = []
@@ -106,7 +113,7 @@ func pre_pickle(obj):
 			var obj_class_id = get_object_class_id(obj)
 
 			if obj_class_id == null:
-				if warn_on_missing_key:
+				if warn_on_missing_class:
 					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
 			else:
@@ -117,12 +124,11 @@ func pre_pickle(obj):
 				else:
 					#print("obj property list: ", obj.get_property_list())
 					#print("script property list: ", obj.get_script().get_script_property_list())
-					for prop in obj.get_property_list():
-						if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-							dict[prop.name] = pre_pickle(obj.get(prop.name))
+					for prop in get_pickleable_properties(obj):
+						dict[prop.name] = pre_pickle(obj.get(prop.name))
 				dict["__class__"] = obj_class_id
 				retval = dict
-		# most objects are just passed through
+		# most builtin types are just passed through
 		_:
 			retval = obj
 	return retval
@@ -141,36 +147,30 @@ func post_unpickle(obj):
 		# Collection Types - recursion!
 		TYPE_DICTIONARY:
 			var dict: Dictionary = obj as Dictionary
-			for key in dict:
-				dict[key] = post_unpickle(dict[key])
-
-			# enforce string-only dict keys
-			var failed_strict = false
-			if strict_dictionary_keys:
-				for key in dict:
-					if typeof(key) != TYPE_STRING:
-						push_error(
-							"dict key must be a string: " + str(key), " is a " + str(typeof(key))
-						)
-						failed_strict = true
-			if failed_strict:
-				retval = null
-			elif "__class__" in dict:
+			if "__class__" in dict:
 				var out = instantiate_from_class_id(dict["__class__"])
 				if out == null:
-					if warn_on_missing_key:
+					if warn_on_missing_class:
 						push_warning("Cannot instantiate from class ID: ", dict["__class__"])
 					return null
 				dict.erase("__class__")
 				if out.has_method("__setstate__"):
+					# for users of __setstate__, just unpickle whatever they want,
+					# even if it's a bad idea.
+					for key in dict:
+						dict[key] = post_unpickle(dict[key])
 					# gdlint:ignore = private-method-call
 					out.__setstate__(dict)
 				else:
-					for prop in out.get_property_list():
-						if prop.usage & (PROPERTY_USAGE_SCRIPT_VARIABLE):
-							out.set(prop.name, dict[prop.name])
+					# for Objects, only recursively unpickle allowed properties.
+					for prop in get_pickleable_properties(out):
+						if dict.has(prop.name):
+							out.set(prop.name, post_unpickle(dict[prop.name]))
 				retval = out
 			else:
+				# for plain Dictionaries, unpickle recursively
+				for key in dict:
+					dict[key] = post_unpickle(dict[key])
 				retval = dict
 		TYPE_ARRAY:
 			var out = []
@@ -178,7 +178,7 @@ func post_unpickle(obj):
 			for element in a:
 				out.append(post_unpickle(element))
 			retval = out
-		# most objects are just passed through
+		# most builtin types are just passed through
 		_:
 			retval = obj
 	return retval
