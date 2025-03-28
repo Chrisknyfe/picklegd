@@ -2,14 +2,21 @@
 extends EditorPlugin
 
 var pickle_nojar = preload("res://addons/picklemp/pickle_nojar.svg")
+var picklejar_pickle_fancy = preload("res://addons/picklemp/picklejar_pickle_fancy.svg")
 
 
 func _enter_tree():
 	add_custom_type(
-		"Pickler",
+		"BasePickler",
 		"Refcounted",
+		preload("res://addons/picklemp/base_pickler.gd"),
+		picklejar_pickle_fancy
+	)
+	add_custom_type(
+		"Pickler",
+		"BasePickler",
 		preload("res://addons/picklemp/pickler.gd"),
-		preload("res://addons/picklemp/picklejar_pickle_fancy.svg")
+		picklejar_pickle_fancy
 	)
 	add_custom_type(
 		"Registry",
@@ -32,4 +39,8 @@ func _enter_tree():
 
 
 func _exit_tree():
+	remove_custom_type("BasePickler")
 	remove_custom_type("Pickler")
+	remove_custom_type("Registry")
+	remove_custom_type("RegisteredBehavior")
+	remove_custom_type("RegisteredClass")

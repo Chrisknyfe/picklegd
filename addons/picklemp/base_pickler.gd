@@ -1,3 +1,5 @@
+class_name BasePickler
+extends RefCounted
 ## A system for serializing and deserializing arbitrary GDScript data.
 ##
 ## This is a system for "pickling" GDScript objects to byte arrays, using native
@@ -7,11 +9,6 @@
 ##
 ## BasePickler is a base class which allows all class types to be pickled by
 ## default. This may be insecure.
-## @experimental
-class_name BasePickler
-extends RefCounted
-
-"""A data serializer that can process Objects without executing arbitrary code"""
 
 const PROP_WHITELIST: PropertyUsageFlags = (
 	PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_ALWAYS_DUPLICATE

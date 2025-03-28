@@ -34,7 +34,7 @@ func _init():
 
 
 ## Register a RegisteredBehavior with this registry, which can later be retrieved by name or ID.
-func register(behavior: RegisteredBehavior):
+func register(behavior: RegisteredBehavior) -> RegisteredBehavior:
 	# First make sure we can register with this name
 	if not behavior.name:
 		push_error("Cannot register with empty name")

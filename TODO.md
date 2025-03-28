@@ -1,12 +1,15 @@
 
 # TODO
-- JSON pickling of basic builtin types like Color isn't working...
-- make sure I can import the library into my game without needing gdunit4 or any 
+- Thorougly test all the builtin types, and a few of the Resources, Nodes, and direct Object subclasses
+- document BasePickler
+- document Registry
+- document RegisteredBehavior
+- document RegisteredClass
+- make sure I can import the library into my game without needing gdunit4
 - rename the plugin to "PickleGD"
 
 # Next version
 - TCP server for larger packets in the example, UDP fragmentation starts at 1392 byte packets.
 - __getnewargs__ will allow constructor calls with arguments
 - register inner classes with a __classname__ variable
-- Document dunder methods of a class. __setstate__ can validate.
 - Registry: ensure all name-to-ID associations have RegisteredBehaviors in a finalize() call

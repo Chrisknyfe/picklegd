@@ -62,12 +62,16 @@ func test_base_pickle_filtering():
 	
 func test_base_pickle_unsafe():
 	var t = TestForm.new()
-	#var t = Node2D.new()
-	var j = _bp.pickle_str(t)
+	var s = _bp.pickle_str(t)
 	# Inject script change!
-	j = j.replace("TestForm", "TestFormUnsafe")
-	#j = j.replace("}", '"script":\n{\n"__class__": &"GDScript"\n}\n}')
-	print(j)
-	var u = _bp.unpickle_str(j)
+	s = s.replace("TestForm", "TestFormUnsafe")
+	print(s)
+	var u = _bp.unpickle_str(s)
 	print(u)
 	assert_str(u.get_script().get_global_name()).is_equal("TestFormUnsafe")
+	
+	# Can I pickle a GDScript?
+	s = _bp.pickle_str(TestFormUnsafe)
+	print(s)
+	u = _bp.unpickle_str(s)
+	print(u)
