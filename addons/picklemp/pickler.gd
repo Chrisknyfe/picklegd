@@ -1,6 +1,7 @@
 class_name Pickler
 extends BasePickler
-## A system for safely serializing and deserializing arbitrary GDScript data.
+## A system for safely serializing and deserializing arbitrary GDScript data,
+## which whitelists Object types that are allowed to be pickled.
 ##
 ## This is a system for serializing GDScript objects to byte arrays, using native
 ## var_to_bytes plus some class inspection magic, to safely handle data without
@@ -9,7 +10,7 @@ extends BasePickler
 ## dictionaries, or large custom classes) over the network to multiplayer peers,
 ## or to disk to save your game's data.
 ## [br][br]
-## Why should you use the Pickler instead of Godot's built-in tools for serialization,
+## Why should you use a [Pickler] instead of Godot's built-in tools for serialization,
 ## such as plain [method @GlobalScope.var_to_bytes],
 ## [method @GlobalScope.var_to_bytes_with_objects], or
 ## [ResourceLoader]? In the case of the var_to_bytes family of methods,
