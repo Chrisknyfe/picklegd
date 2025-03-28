@@ -2,15 +2,8 @@ extends Control
 
 @export var bad_resource: Resource
 
-class InlineForm extends Object:
-	@export var message: String = ""
-	@export var is_reticulated: bool = false
-	@export var num_sheep: int = 2
-	@export var albedo: Color = Color.BLUE
-
 func _ready():
 	why_var_to_bytes_is_unsafe()
-	var_to_str_with_inline_class()
 	why_resourcesaver_is_unsafe()
 	await get_tree().create_timer(1).timeout
 	get_tree().quit()
@@ -40,14 +33,6 @@ func why_resourcesaver_is_unsafe():
 	
 	# If I send you unsafe.tres and you load it with ResourceLoader.load, I can pwn your machine.
 	var unsafe2 = ResourceLoader.load("user://unsafe.tres")
-	
-func var_to_str_with_inline_class():
-	var f = InlineForm.new()
-	var vtb = var_to_bytes_with_objects(f) 
-	print("hack should fail: ", vtb)
-	var vts = var_to_str(f)
-	print("hack should succeed?: ", vts)
-	
 	
 	
 func why_var_to_bytes_is_unsafe():

@@ -71,7 +71,11 @@ var class_registry: Registry = Registry.new()
 func register_custom_class(c: Script) -> RegisteredClass:
 	"""Register a custom class."""
 	var rc = RegisteredClass.new()
-	rc.name = c.get_global_name()
+	var gname: StringName = c.get_global_name()
+	if gname == null or gname.is_empty():
+		push_warning("Cannot get class name: ", c)
+		return null
+	rc.name = gname
 	rc.custom_class_def = c
 	return class_registry.register(rc) as RegisteredClass
 
@@ -98,12 +102,15 @@ func has_native_class(cls_name: String) -> bool:
 
 ## Get an ID for this object's class, if the class is registered
 func get_object_class_id(obj: Object):
-	var scr = obj.get_script()
+	var scr: Script = obj.get_script()
 	var obj_class_name = null
 	if scr != null:
 		obj_class_name = scr.get_global_name()
 	else:
 		obj_class_name = obj.get_class()
+	if obj_class_name == null or obj_class_name.is_empty():
+		push_warning("Cannot get object class name: ", obj)
+		return null
 	if not class_registry.has_by_name(obj_class_name):
 		push_warning("Object class type unregistered: ", obj_class_name)
 		return null

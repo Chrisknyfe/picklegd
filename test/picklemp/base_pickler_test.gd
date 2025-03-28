@@ -20,6 +20,10 @@ var _data = {
 		"unsafe": TestFormUnsafe.new(),
 	}
 	
+class InlineObject extends Object:
+	@export var foo: int = 1
+	@export var bar: float = 2.0
+	
 func before():
 	_data["one"].foo = 2.0
 	_data["two"].qux = "r"
@@ -34,7 +38,8 @@ func test_base_pickle_roudtrip() -> void:
 	assert_object(_data["native"]).is_equal(u["native"])
 	assert_object(_data["nativeobj"]).is_equal(u["nativeobj"])
 	assert_array(_data["json_things"]).contains_same_exactly(u["json_things"])
-	
+	u["node"].queue_free()
+
 func test_base_pickle_getstate_setstate():
 	var two = CustomClassTwo.new()
 	var p = _bp.pickle(two)
@@ -44,10 +49,10 @@ func test_base_pickle_getstate_setstate():
 	
 	
 func test_base_pickle_str():
-	var s = var_to_str(_bp.pre_pickle(_data))
+	var s = _bp.pickle_str(_data)
 	print(s)
-	var u = _bp.post_unpickle(str_to_var(s))
-	
+	var u = _bp.unpickle_str(s)
+	u["node"].queue_free()
 	
 	
 func test_base_pickle_filtering():
@@ -60,18 +65,23 @@ func test_base_pickle_filtering():
 	var u = _bp.post_unpickle(j)
 	assert_that(u["bad_obj"]).is_null()
 	
-func test_base_pickle_unsafe():
+func test_base_pickle_inject_script_change():
 	var t = TestForm.new()
+	
 	var s = _bp.pickle_str(t)
-	# Inject script change!
 	s = s.replace("TestForm", "TestFormUnsafe")
 	print(s)
 	var u = _bp.unpickle_str(s)
 	print(u)
 	assert_str(u.get_script().get_global_name()).is_equal("TestFormUnsafe")
 	
+func test_base_pickle_a_script():
 	# Can I pickle a GDScript?
-	s = _bp.pickle_str(TestFormUnsafe)
+	var s = _bp.pickle_str(TestFormUnsafe)
 	print(s)
-	u = _bp.unpickle_str(s)
+	var u = _bp.unpickle_str(s)
 	print(u)
+
+func test_base_pickle_inline_object():
+	var s = _bp.pickle_str(InlineObject.new())
+	assert_str(s).is_equal('null')

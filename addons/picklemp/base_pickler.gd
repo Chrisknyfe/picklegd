@@ -95,9 +95,12 @@ func unpickle(buffer: PackedByteArray):
 ## Get an ID for this object's class. Defaults to returning the obj's class name
 func get_object_class_id(obj: Object):
 	# return null if you don't want this object pickled
-	var scr = obj.get_script()
+	var scr: Script = obj.get_script()
 	if scr != null:
-		return scr.get_global_name()
+		var gname: StringName = scr.get_global_name()
+		if gname.is_empty():
+			return null
+		return gname
 	return obj.get_class()
 
 
@@ -118,13 +121,13 @@ func instantiate_from_class_id(id):
 ## Properties such as the Object's "script" should be filtered out.
 func get_pickleable_properties(obj: Object):
 	var good_props = []
-	print("props for class ", get_object_class_id(obj))
+	#print("props for class ", get_object_class_id(obj))
 	for prop in obj.get_property_list():
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			print("keep prop ", prop.name, " :: ", prop.usage)
+			#print("keep prop ", prop.name, " :: ", prop.usage)
 			good_props.append(prop)
-		else:
-			print("---- prop ", prop.name, " :: ", prop.usage)
+		#else:
+		#print("---- prop ", prop.name, " :: ", prop.usage)
 	return good_props
 
 
