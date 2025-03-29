@@ -9,6 +9,54 @@ const __source = 'res://addons/picklemp/base_pickler.gd'
 
 
 var _bp:BasePickler = BasePickler.new()
+# refer to @GlobalScope.Variant.Type enum in Godot 4.4
+var _some_builtin_types = [
+	null,
+	true,
+	2,
+	3.0,
+	"four",
+	Vector2(5.0,5.0),
+	Vector2i(6,6),
+	Rect2(7.0, 7.0, 7.0, 7.0),
+	Rect2i(8,8,8,8),
+	Vector3(9.0,9.0,9.0),
+	Vector3i(10,10,10),
+	Transform2D(),
+	Vector4(12.0,12.0,12.0,12.0),
+	Vector4i(13,13,13,13),
+	Plane(),
+	Quaternion(),
+	AABB(),
+	Basis(),
+	Transform3D(),
+	Projection(),
+	Color(0.5, 0.5, 0.5, 0.5),
+	StringName("twenty_one"),
+	NodePath(),
+	#RID(), # type 23 rejected type because it's an internal ID
+	Object.new(),
+	#Callable(), # type 25 rejected type because it's code-over-the-wire
+	#Signal(), # type 26 rejected type because it's code-over-the-wire
+	Dictionary(),
+	Array(),
+	PackedByteArray([29,29,29,29]),
+	PackedInt32Array([30,30,30,30]),
+	PackedInt64Array([31,31,31,31]),
+	PackedFloat32Array([32.0,32.0,32.0,32.0]),
+	PackedFloat64Array([33.0,33.0,33.0,33.0]),
+	PackedStringArray(["thirty", "four"]),
+	PackedVector2Array([Vector2(35,35),Vector2(35,35)]),
+	PackedVector3Array([Vector3(36,36,36),Vector3(36,36,36)]),
+	PackedColorArray([Color(0.3,0.7,0.0),Color(0.3,0.7,0.0)]),
+	PackedVector4Array([Vector4(38.0,38.0,38.0,38.0),Vector4(38.0,38.0,38.0,38.0)]),
+]
+
+# TODO: try image, try material
+var _some_godot_resources = {
+	"resource": Resource.new(),
+	"circle": CircleShape2D.new()
+}
 var _data = {
 		"one": CustomClassOne.new(),
 		"two": CustomClassTwo.new(),
@@ -27,6 +75,7 @@ class InlineObject extends Object:
 func before():
 	_data["one"].foo = 2.0
 	_data["two"].qux = "r"
+	_some_godot_resources["circle"].radius = 5.0
 
 
 func test_base_pickle_roudtrip() -> void:
@@ -39,6 +88,29 @@ func test_base_pickle_roudtrip() -> void:
 	assert_object(_data["nativeobj"]).is_equal(u["nativeobj"])
 	assert_array(_data["json_things"]).contains_same_exactly(u["json_things"])
 	u["node"].queue_free()
+	
+func test_base_pickle_roundtrip_builtins():
+	var p = _bp.pickle(_some_builtin_types)
+	var u = _bp.unpickle(p)
+	for i in _some_builtin_types.size():
+		assert_int(typeof(_some_builtin_types[i])).is_equal(typeof(u[i]))
+		assert_that(_some_builtin_types[i]).is_equal(u[i])
+
+func test_base_pickle_str_roundtrip_builtins():
+	var p = _bp.pickle_str(_some_builtin_types)
+	var u = _bp.unpickle_str(p)
+	for i in _some_builtin_types.size():
+		assert_int(typeof(_some_builtin_types[i])).is_equal(typeof(u[i]))
+		assert_that(_some_builtin_types[i]).is_equal(u[i])
+
+
+func test_base_pickle_godot_resources():
+	var p = _bp.pickle_str(_some_godot_resources)
+	var u = _bp.unpickle_str(p)
+	print("godot resources: ",  p)
+	for key in _some_godot_resources.keys():
+		assert_int(typeof(_some_godot_resources[key])).is_equal(typeof(u[key]))
+		assert_that(_some_godot_resources[key]).is_equal(u[key])
 
 func test_base_pickle_getstate_setstate():
 	var two = CustomClassTwo.new()
