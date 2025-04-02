@@ -1,9 +1,7 @@
 
 # TODO
 - Thorougly test few builtin Resources, Nodes, and direct Object subclasses
-- document Registry
-- document RegisteredBehavior
-- document RegisteredClass
+- Go through unit tests and make sure unnecessary ones are pruned or updated
 - make sure I can import the library into my game without needing gdunit4
 - rename the plugin to "PickleGD"
 

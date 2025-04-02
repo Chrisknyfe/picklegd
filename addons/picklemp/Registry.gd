@@ -1,9 +1,9 @@
-## A generic registry which keeps track of a collection of RegisteredBehaviors.
-## Can be used to store, for example, weapon types for your game. Or to register custom class types.
-## Inherit from RegisteredBehavior to customize they types you are storing.
-
 class_name Registry
 extends RefCounted
+## A generic registry which keeps track of a collection of [RegisteredBehavior].
+##
+## Can be used to store, for example, weapon types for your game. Or to register custom class types.
+## Inherit from RegisteredBehavior to customize the types you are storing.
 
 ## The next ID that will be used when a new class is registered.
 var next_available_id = 0
@@ -27,10 +27,6 @@ func clear():
 	by_id.clear()
 	name_to_id.clear()
 	id_to_name.clear()
-
-
-func _init():
-	clear()
 
 
 ## Register a RegisteredBehavior with this registry, which can later be retrieved by name or ID.
