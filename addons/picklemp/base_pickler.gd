@@ -126,13 +126,13 @@ func instantiate_from_class_id(id):
 ## Properties such as the Object's "script" should be filtered out.
 func get_pickleable_properties(obj: Object):
 	var good_props = []
-	print("props for class ", get_object_class_id(obj))
+	#print("props for class ", get_object_class_id(obj))
 	for prop in obj.get_property_list():
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			print("keep prop ", prop.name, " :: ", prop.usage)
+			#print("keep prop ", prop.name, " :: ", prop.usage)
 			good_props.append(prop)
-		else:
-			print("---- prop ", prop.name, " :: ", prop.usage)
+		#else:
+		#print("---- prop ", prop.name, " :: ", prop.usage)
 	return good_props
 
 

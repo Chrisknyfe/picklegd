@@ -52,10 +52,11 @@ var _some_builtin_types = [
 	PackedVector4Array([Vector4(38.0,38.0,38.0,38.0),Vector4(38.0,38.0,38.0,38.0)]),
 ]
 
-# TODO: try image, try material
 var _some_godot_resources = {
 	"resource": Resource.new(),
-	"circle": CircleShape2D.new()
+	"circle": CircleShape2D.new(),
+	"image": Image.load_from_file("res://icon.svg"),
+	#"material": load("res://test/picklemp/test_mat.tres")
 }
 var _data = {
 		"one": CustomClassOne.new(),
@@ -105,12 +106,15 @@ func test_base_pickle_str_roundtrip_builtins():
 
 
 func test_base_pickle_godot_resources():
-	var p = _bp.pickle_str(_some_godot_resources)
+	var resources = _some_godot_resources
+	var p = _bp.pickle_str(resources)
 	var u = _bp.unpickle_str(p)
 	print("godot resources: ",  p)
-	for key in _some_godot_resources.keys():
-		assert_int(typeof(_some_godot_resources[key])).is_equal(typeof(u[key]))
-		assert_that(_some_godot_resources[key]).is_equal(u[key])
+	for key in resources.keys():
+		var r_obj = resources[key]
+		var u_obj = u[key]
+		assert_str(r_obj.get_class()).is_equal(u_obj.get_class())
+		assert_that(r_obj).is_equal(u_obj)
 
 func test_base_pickle_getstate_setstate():
 	var two = CustomClassTwo.new()
