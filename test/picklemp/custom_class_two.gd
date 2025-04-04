@@ -5,7 +5,7 @@ var baz: float = 4.0
 var qux: String = "x"
 var volatile_int: int = 3
 
-func __getstate__():
+func __getstate__() -> Dictionary:
 	var state = {
 		"1": baz,
 		"2": qux

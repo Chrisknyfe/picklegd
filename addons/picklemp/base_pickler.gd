@@ -43,7 +43,12 @@ extends RefCounted
 ## serialization, and later will call [code]__setstate__()[/code] to set an Object's properties
 ## during deserialization. You may also use these methods to perform
 ## input validation on an Object's properties.
-## [br]For example:
+## [br][br]
+## [code]__getstate__()[/code] takes no arguments, and must return a [Dictionary].
+## [br][br]
+## [code]__setstate__()[/code] takes one argument, the state [Dictionary], and has no return value.
+## [br][br]
+## For example:
 ## [codeblock lang=gdscript]
 ## class_name CustomClassTwo
 ##
@@ -121,14 +126,54 @@ func instantiate_from_class_id(id):
 ## Properties such as the Object's "script" should be filtered out.
 func get_pickleable_properties(obj: Object):
 	var good_props = []
-	#print("props for class ", get_object_class_id(obj))
+	print("props for class ", get_object_class_id(obj))
 	for prop in obj.get_property_list():
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			#print("keep prop ", prop.name, " :: ", prop.usage)
+			print("keep prop ", prop.name, " :: ", prop.usage)
 			good_props.append(prop)
-		#else:
-		#print("---- prop ", prop.name, " :: ", prop.usage)
+		else:
+			print("---- prop ", prop.name, " :: ", prop.usage)
 	return good_props
+
+
+## Get an object's state.
+## Calls an object's [code]__getstate__()[/code], if it has one.
+## Override this function if you want your extended pickler to
+## perform special behavior for getting an object's state.
+## Make sure to call [method BasePickler.pre_pickle] on all elements
+## of the dictionary before returning it.
+func get_object_state(obj: Object) -> Dictionary:
+	var dict = {}
+	if obj.has_method("__getstate__"):
+		# gdlint:ignore = private-method-call
+		dict = obj.__getstate__()
+	else:
+		for prop in get_pickleable_properties(obj):
+			dict[prop.name] = obj.get(prop.name)
+	for key in dict.keys():
+		dict[key] = pre_pickle(dict[key])
+	return dict
+
+
+## Set an object's state.
+## Calls an object's [code]__setstate__()[/code], if it has one.
+## Override this function if you want your extended pickler to
+## perform special behavior when setting an object's state.
+## Make sure to call [method BasePickler.post_unpickle] on all elements
+## of the state dictionary before setting state.
+func set_object_state(obj: Object, state: Dictionary):
+	if obj.has_method("__setstate__"):
+		# for users of __setstate__, just unpickle whatever they want,
+		# even if it's a bad idea.
+		for key in state:
+			state[key] = post_unpickle(state[key])
+		# gdlint:ignore = private-method-call
+		obj.__setstate__(state)
+	else:
+		# for Objects, only recursively unpickle allowed properties.
+		for prop in get_pickleable_properties(obj):
+			if state.has(prop.name):
+				obj.set(prop.name, post_unpickle(state[prop.name]))
 
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
@@ -165,15 +210,7 @@ func pre_pickle(obj):
 					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
 			else:
-				var dict = {}
-				if obj.has_method("__getstate__"):
-					# gdlint:ignore = private-method-call
-					dict = obj.__getstate__()
-				else:
-					#print("obj property list: ", obj.get_property_list())
-					#print("script property list: ", obj.get_script().get_script_property_list())
-					for prop in get_pickleable_properties(obj):
-						dict[prop.name] = pre_pickle(obj.get(prop.name))
+				var dict = get_object_state(obj)
 				dict["__class__"] = obj_class_id
 				retval = dict
 		# most builtin types are just passed through
@@ -202,18 +239,7 @@ func post_unpickle(obj):
 						push_warning("Cannot instantiate from class ID: ", dict["__class__"])
 					return null
 				dict.erase("__class__")
-				if out.has_method("__setstate__"):
-					# for users of __setstate__, just unpickle whatever they want,
-					# even if it's a bad idea.
-					for key in dict:
-						dict[key] = post_unpickle(dict[key])
-					# gdlint:ignore = private-method-call
-					out.__setstate__(dict)
-				else:
-					# for Objects, only recursively unpickle allowed properties.
-					for prop in get_pickleable_properties(out):
-						if dict.has(prop.name):
-							out.set(prop.name, post_unpickle(dict[prop.name]))
+				set_object_state(out, dict)
 				retval = out
 			else:
 				# for plain Dictionaries, unpickle recursively
