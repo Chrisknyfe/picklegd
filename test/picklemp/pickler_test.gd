@@ -90,7 +90,7 @@ func test_pickle_filtering():
 	#assert_error(_pickler.pre_pickle.bind(SurfaceTool.new()))\
 	#.is_push_error('Missing object type in picked data: SurfaceTool')
 
-
+# TODO: this should be a set of tests for a Registry
 func test_pickle_load_associations() -> void:
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(CustomClassTwo)
