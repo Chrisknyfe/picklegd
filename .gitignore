@@ -18,4 +18,4 @@ mono_crash.*.json
 .vscode/
 
 # GDUnit4
-addons\gdUnit4\GdUnitRunner.cfg
+addons/gdUnit4/
