@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t6b3iqwfuvhd"
-path="res://.godot/imported/picklejar_pickle_fancy.png-a6c0ae5d09485f3b8bce1ae521b9e442.ctex"
+uid="uid://crwhf13klrpqb"
+path="res://.godot/imported/pickle_nojar.svg-7ada7df4f3ac7660feeffa380aaa2638.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/picklemp/picklejar_pickle_fancy.png"
-dest_files=["res://.godot/imported/picklejar_pickle_fancy.png-a6c0ae5d09485f3b8bce1ae521b9e442.ctex"]
+source_file="res://addons/picklegd/pickle_nojar.svg"
+dest_files=["res://.godot/imported/pickle_nojar.svg-7ada7df4f3ac7660feeffa380aaa2638.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

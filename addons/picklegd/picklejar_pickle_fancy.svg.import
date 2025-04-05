@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b857om1gh8ul5"
-path="res://.godot/imported/picklejar_pickle_fancy.svg-4a0e1eb58fe016247f2eac8054598bb9.ctex"
+path="res://.godot/imported/picklejar_pickle_fancy.svg-6f12bbdc19d0b475e9c26d1ae84dbbfd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/picklemp/picklejar_pickle_fancy.svg"
-dest_files=["res://.godot/imported/picklejar_pickle_fancy.svg-4a0e1eb58fe016247f2eac8054598bb9.ctex"]
+source_file="res://addons/picklegd/picklejar_pickle_fancy.svg"
+dest_files=["res://.godot/imported/picklejar_pickle_fancy.svg-6f12bbdc19d0b475e9c26d1ae84dbbfd.ctex"]
 
 [params]
 
