@@ -1,3 +1,4 @@
 # Exclude GDUnit4 tests from the zip release
+.gitattributes export-ignore
 test        export-ignore
 test/**     export-ignore
