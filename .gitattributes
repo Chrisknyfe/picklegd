@@ -4,6 +4,6 @@
 # Only include the addons folder when downloading from the Asset Library.
 /**        export-ignore
 /addons/picklegd/    !export-ignore
-/addons/picklegd/** !export-ignore
+/addons/picklegd/**  !export-ignore
 /example    !export-ignore
 /example/** !export-ignore

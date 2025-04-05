@@ -2,7 +2,7 @@
 PickleGD is a Godot asset for safely serializing arbitrary godot data structures, 
 including custom classes, over multiplayer and to disk.
 
-Tested with: Godot Engine v4.3.stable.official.77dcf97d8 
+Tested with: Godot Engine v4.4.stable.official.4c311cbee 
 
 This is a system for "pickling" GDScript objects to byte arrays, using native 
 var_to_bytes plus some code inspection magic. It's meant to make it easy for you
