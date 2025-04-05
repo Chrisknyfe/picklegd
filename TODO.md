@@ -1,9 +1,5 @@
 
 # TODO
-- make sure I can import the library into my game without needing gdunit4
-- rename the plugin to "PickleGD"
-
-# Next version
 - BasePickler: __getnewargs__ will allow constructor calls with arguments
 - Registry: clobber associations
 - Pickler: create some sensible __getstate__ / __setstate__ / __getnewargs__ for some native classes, like SurfaceTool and ArrayMesh.
