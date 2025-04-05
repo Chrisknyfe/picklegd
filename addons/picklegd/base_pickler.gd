@@ -72,6 +72,7 @@ const PROP_BLACKLIST: PropertyUsageFlags = (
 	| PROPERTY_USAGE_NEVER_DUPLICATE
 	| PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT
 )
+const CLASS_KEY = "__cls"
 
 ## Generate warnings when a class is unrecognized during pickling & unpickling.
 @export var warn_on_missing_class = true
@@ -211,7 +212,7 @@ func pre_pickle(obj):
 				retval = null
 			else:
 				var dict = get_object_state(obj)
-				dict["__class__"] = obj_class_id
+				dict[CLASS_KEY] = obj_class_id
 				retval = dict
 		# most builtin types are just passed through
 		_:
@@ -232,13 +233,13 @@ func post_unpickle(obj):
 		# Collection Types - recursion!
 		TYPE_DICTIONARY:
 			var dict: Dictionary = obj as Dictionary
-			if "__class__" in dict:
-				var out = instantiate_from_class_id(dict["__class__"])
+			if CLASS_KEY in dict:
+				var out = instantiate_from_class_id(dict[CLASS_KEY])
 				if out == null:
 					if warn_on_missing_class:
-						push_warning("Cannot instantiate from class ID: ", dict["__class__"])
+						push_warning("Cannot instantiate from class ID: ", dict[CLASS_KEY])
 					return null
-				dict.erase("__class__")
+				dict.erase(CLASS_KEY)
 				set_object_state(out, dict)
 				retval = out
 			else:

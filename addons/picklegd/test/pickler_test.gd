@@ -81,7 +81,7 @@ func test_pickle_filtering():
 	assert_that(j["nativeobj"]).is_null()
 	
 	j["bad_obj"] = {
-		"__class__": 99
+		BasePickler.CLASS_KEY: 99
 	}
 	
 	var u = _pickler.post_unpickle(j)

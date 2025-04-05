@@ -147,7 +147,7 @@ func test_base_pickle_filtering():
 	var j = {}
 	
 	j["bad_obj"] = {
-		"__class__": 99
+		BasePickler.CLASS_KEY: 99
 	}
 	
 	var u = _bp.post_unpickle(j)
