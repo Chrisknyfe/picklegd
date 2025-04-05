@@ -1,2 +1,0 @@
-# Exclude GDUnit4 tests from the zip release
-*        export-ignore
