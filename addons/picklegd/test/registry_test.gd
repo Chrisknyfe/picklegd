@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 @warning_ignore('return_value_discarded')
 
 # TestSuite generated from
-const __source = 'res://addons/picklemp/registry.gd'
+const __source = 'res://addons/picklegd/registry.gd'
 
 
 var _reg := Registry.new()

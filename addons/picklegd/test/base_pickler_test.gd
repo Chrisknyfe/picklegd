@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 @warning_ignore('return_value_discarded')
 
 # TestSuite generated from
-const __source = 'res://addons/picklemp/base_pickler.gd'
+const __source = 'res://addons/picklegd/base_pickler.gd'
 
 
 var _bp:BasePickler = BasePickler.new()
@@ -58,7 +58,7 @@ var _resources = {
 	"resource": Resource.new(),
 	"circle": CircleShape2D.new(),
 	"image": Image.load_from_file("res://icon.svg"),
-	#"material": load("res://test/picklemp/test_mat.tres")
+	#"material": load("res://test/picklegd/test_mat.tres")
 }
 var _customs = {
 	"one": CustomClassOne.new(),
