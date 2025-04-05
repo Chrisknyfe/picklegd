@@ -189,3 +189,9 @@ func _init():
 func test_base_pickle_inline_object():
 	var s = _bp.pickle_str(InlineObject.new())
 	assert_str(s).is_equal('null')
+	
+func test_newargs():
+	var s = _bp.pickle_str(CustomClassNewargs.new("constructor_arg!"))
+	print(s)
+	var u = _bp.unpickle_str(s)
+	print(u)

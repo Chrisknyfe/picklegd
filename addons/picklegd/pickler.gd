@@ -119,11 +119,22 @@ func get_object_class_id(obj: Object):
 
 
 ## Create an instance of this class from its ID, if the ID is registered.
-func instantiate_from_class_id(id) -> Object:
+func instantiate_from_class_id(id, newargs: Array) -> Object:
 	if typeof(id) != TYPE_INT:
 		return null
 	if not class_registry.has_by_id(id):
 		push_warning("Object class ID unregistered: ", id)
 		return null
 	var reg: RegisteredClass = class_registry.get_by_id(id)
-	return reg.instantiate()
+	if not newargs.is_empty():
+		if reg.custom_class_def != null:
+			return reg.custom_class_def.callv("new", newargs)
+		if ClassDB.class_exists(reg.name):
+			push_warning("Cannot instantiate a native class with constructor arguments")
+			return null
+	else:
+		if reg.custom_class_def != null:
+			return reg.custom_class_def.new()
+		if ClassDB.class_exists(reg.name):
+			return ClassDB.instantiate(reg.name)
+	return null

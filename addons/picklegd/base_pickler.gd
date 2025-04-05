@@ -72,7 +72,8 @@ const PROP_BLACKLIST: PropertyUsageFlags = (
 	| PROPERTY_USAGE_NEVER_DUPLICATE
 	| PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT
 )
-const CLASS_KEY = "__cls"
+const CLASS_KEY = "__CLS"
+const NEWARGS_KEY = "__NEW"
 
 ## Generate warnings when a class is unrecognized during pickling & unpickling.
 @export var warn_on_missing_class = true
@@ -111,15 +112,25 @@ func get_object_class_id(obj: Object):
 
 
 ## Create an instance of this class from its ID. Defaults to treating the id as a class name.
-func instantiate_from_class_id(id):
+## Returns the new instance, or null if it couldn't be created.
+func instantiate_from_class_id(id, newargs: Array) -> Object:
 	var str_id = str(id)
-	# return null if you don't want to create an object of this type
-	if ClassDB.class_exists(str_id):
-		return ClassDB.instantiate(str_id)
-	for global_class in ProjectSettings.get_global_class_list():
-		if global_class["class"] == str_id:
-			var scr = load(global_class["path"]) as Script
-			return scr.new()
+	
+	if not newargs.is_empty():
+		if ClassDB.class_exists(str_id):
+			push_warning("Cannot instantiate a native class with constructor arguments")
+			return null
+		for global_class in ProjectSettings.get_global_class_list():
+			if global_class["class"] == str_id:
+				var scr = load(global_class["path"]) as Script
+				return scr.callv("new", newargs)
+	else:
+		if ClassDB.class_exists(str_id):
+			return ClassDB.instantiate(str_id)
+		for global_class in ProjectSettings.get_global_class_list():
+			if global_class["class"] == str_id:
+				var scr = load(global_class["path"]) as Script
+				return scr.new()
 	return null
 
 
@@ -135,6 +146,15 @@ func get_pickleable_properties(obj: Object):
 		#else:
 		#print("---- prop ", prop.name, " :: ", prop.usage)
 	return good_props
+
+
+func get_object_newargs(obj: Object) -> Array:
+	if obj.has_method("__getnewargs__"):
+		var newargs = obj.__getnewargs__()
+		for i in range(len(newargs)):
+			newargs[i] = pre_pickle(newargs[i])
+		return newargs
+	return []
 
 
 ## Get an object's state.
@@ -211,8 +231,11 @@ func pre_pickle(obj):
 					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
 			else:
-				var dict = get_object_state(obj)
+				var dict := get_object_state(obj)
 				dict[CLASS_KEY] = obj_class_id
+				var newargs := get_object_newargs(obj)
+				if not newargs.is_empty():
+					dict[NEWARGS_KEY] = newargs
 				retval = dict
 		# most builtin types are just passed through
 		_:
@@ -234,7 +257,10 @@ func post_unpickle(obj):
 		TYPE_DICTIONARY:
 			var dict: Dictionary = obj as Dictionary
 			if CLASS_KEY in dict:
-				var out = instantiate_from_class_id(dict[CLASS_KEY])
+				var newargs = []
+				if NEWARGS_KEY in dict:
+					newargs = dict[NEWARGS_KEY]
+				var out = instantiate_from_class_id(dict[CLASS_KEY], newargs)
 				if out == null:
 					if warn_on_missing_class:
 						push_warning("Cannot instantiate from class ID: ", dict[CLASS_KEY])

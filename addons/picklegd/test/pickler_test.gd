@@ -116,4 +116,10 @@ func test_pickle_load_associations() -> void:
 		assert_str(cls1.name).is_equal(cls2.name)
 		assert_int(cls1.id).is_equal(cls2.id)
 
-	
+
+func test_newargs():
+	_pickler.register_custom_class(CustomClassNewargs)
+	var s = _pickler.pickle_str(CustomClassNewargs.new("constructor_arg!"))
+	print(s)
+	var u = _pickler.unpickle_str(s)
+	print(u)
