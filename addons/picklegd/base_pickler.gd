@@ -118,6 +118,7 @@ func instantiate_from_class_id(id, newargs: Array) -> Object:
 	
 	if not newargs.is_empty():
 		if ClassDB.class_exists(str_id):
+			# TODO: should I just ignore newargs and instantiate anyway?
 			push_warning("Cannot instantiate a native class with constructor arguments")
 			return null
 		for global_class in ProjectSettings.get_global_class_list():
