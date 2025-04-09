@@ -11,6 +11,8 @@ to multiplayer peers, or to create your own save system. PickleGD is designed
 to prevent arbitrary code execution in the serialization and deserialization
 process.
 
+Note: this asset is not compatible with Python's pickle format.
+
 # Quick Start example
 
 To get started pickling your data, first create a pickler.
