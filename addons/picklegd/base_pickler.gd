@@ -89,9 +89,6 @@ const PROP_BLACKLIST: PropertyUsageFlags = (
 const CLASS_KEY = "__CLS"
 const NEWARGS_KEY = "__NEW"
 
-## Generate warnings when a class is unrecognized during pickling & unpickling.
-@export var warn_on_missing_class = true
-
 
 ## Pickle the arbitary GDScript data to a string.
 func pickle_str(obj) -> String:
@@ -124,7 +121,7 @@ func get_object_class_id(obj: Object):
 	else:
 		obj_class_name = obj.get_class()
 	if obj_class_name == null or obj_class_name.is_empty():
-		push_warning("Cannot get object class name: ", obj)
+		push_warning("Cannot get object class id")
 		return null
 	return obj_class_name
 
@@ -245,8 +242,6 @@ func pre_pickle(obj):
 			var obj_class_id = get_object_class_id(obj)
 
 			if obj_class_id == null:
-				if warn_on_missing_class:
-					push_warning("Cannot find a class name for object: ", obj)
 				retval = null
 			else:
 				var dict := get_object_state(obj)
@@ -281,8 +276,6 @@ func post_unpickle(obj):
 				dict.erase(NEWARGS_KEY)
 				var out = instantiate_from_class_id(dict[CLASS_KEY], newargs)
 				if out == null:
-					if warn_on_missing_class:
-						push_warning("Cannot instantiate from class ID: ", dict[CLASS_KEY])
 					return null
 				dict.erase(CLASS_KEY)
 				set_object_state(out, dict)

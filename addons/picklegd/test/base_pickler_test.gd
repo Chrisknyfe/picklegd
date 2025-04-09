@@ -186,8 +186,11 @@ func _init():
 ## You can't pickle an instance of an inline class. 
 ## It doesn't have a global name.
 func test_base_pickle_inline_object():
+	await assert_error(func(): _bp.get_object_class_id(InlineObject.new())).is_push_warning("Cannot get object class id")
 	var s = _bp.pickle_str(InlineObject.new())
 	assert_str(s).is_equal('null')
+	var id = _bp.get_object_class_id(InlineObject.new())
+	assert_that(id).is_null()
 	
 func test_newargs():
 	var s = _bp.pickle_str(CustomClassNewargs.new("constructor_arg!"))
