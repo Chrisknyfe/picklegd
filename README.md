@@ -30,7 +30,7 @@ pickler.register_custom_class(CustomClassTwo)
 If you want to register godot engine native classes, you must use the class name
 as a string:
 ```
-pickler.register_native_class("SurfaceTool")
+pickler.register_native_class("Node2D")
 ```
 
 Now you are ready to pickle your data! On the sender's side, just pass your data
@@ -41,6 +41,7 @@ side pass the PackedByteArray to `pickler.unpickle()`.
 var data = {
 		"one": CustomClassOne.new(),
 		"things": ["str", 42, {"foo":"bar"}, [1,2,3], true, false, null],
+		"node": Node2D.new(),
 	}
 var pba: PackedByteArray = pickler.pickle(data)
 

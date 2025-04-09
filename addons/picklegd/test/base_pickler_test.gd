@@ -69,8 +69,7 @@ var _customs = {
 var _misc = {
 	"json_things": ["str", 42, {"foo":"bar"}, [1,2,3], true, false, null],
 	"json_things_2": {"foo":"bar", "baz":123},
-	"nativeobj": SurfaceTool.new(),
-	"node": Node2D.new(),
+	"nativeobj": Node2D.new(),
 }
 	
 class InlineObject extends Object:

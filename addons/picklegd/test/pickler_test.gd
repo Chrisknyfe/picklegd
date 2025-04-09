@@ -15,7 +15,7 @@ var _data = {
 		"3": CustomClassTwo.new(),
 		"json_things": ["str", 42, {"foo":"bar"}, [1,2,3], true, false, null],
 		"native": Vector3(0,1,2),
-		"nativeobj": SurfaceTool.new(),
+		"nativeobj": Node2D.new(),
 	}
 	
 func before():
@@ -33,17 +33,17 @@ func test_register_custom_class() -> void:
 
 
 func test_register_native_class() -> void:
-	_pickler.register_native_class("SurfaceTool")
-	assert_that(_pickler.has_native_class("SurfaceTool"))
+	_pickler.register_native_class("Node2D")
+	assert_that(_pickler.has_native_class("Node2D"))
 
 
 func test_pickle_roudtrip() -> void:
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(CustomClassTwo)
-	_pickler.register_native_class("SurfaceTool")
+	_pickler.register_native_class("Node2D")
 	assert_that(_pickler.has_custom_class(CustomClassOne))
 	assert_that(_pickler.has_custom_class(CustomClassTwo))
-	assert_that(_pickler.has_native_class("SurfaceTool"))
+	assert_that(_pickler.has_native_class("Node2D"))
 	
 	#print("tostring: ", _data["one"].get_script())
 	#print("please print something")
@@ -54,6 +54,7 @@ func test_pickle_roudtrip() -> void:
 	assert_object(_data["native"]).is_equal(u["native"])
 	assert_object(_data["nativeobj"]).is_equal(u["nativeobj"])
 	assert_array(_data["json_things"]).contains_same_exactly(u["json_things"])
+	u["nativeobj"].queue_free()
 	
 func test_pickle_getstate_setstate():
 	_pickler.register_custom_class(CustomClassTwo)
@@ -63,13 +64,14 @@ func test_pickle_getstate_setstate():
 	assert_int(two.volatile_int).is_equal(-1)
 	var u = _pickler.unpickle(p)
 	assert_int(u.volatile_int).is_equal(99)
-	
+		
 func test_pickle_str():
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(CustomClassTwo)
-	_pickler.register_native_class("SurfaceTool")
+	_pickler.register_native_class("Node2D")
 	var j = _pickler.pickle_str(_data)
 	var u = _pickler.unpickle_str(j)
+	u["nativeobj"].queue_free()
 	
 func test_pickle_filtering():
 	var j = _pickler.pre_pickle(_data)
@@ -87,28 +89,28 @@ func test_pickle_filtering():
 	var u = _pickler.post_unpickle(j)
 	assert_that(u["bad_obj"]).is_null()
 
-	#assert_error(_pickler.pre_pickle.bind(SurfaceTool.new()))\
-	#.is_push_error('Missing object type in picked data: SurfaceTool')
+	#assert_error(_pickler.pre_pickle.bind(Node2D.new()))\
+	#.is_push_error('Missing object type in picked data: Node2D')
 
 # TODO: this should be a set of tests for a Registry
 func test_pickle_load_associations() -> void:
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(CustomClassTwo)
-	_pickler.register_native_class("SurfaceTool")
+	_pickler.register_native_class("Node2D")
 	assert_that(_pickler.has_custom_class(CustomClassOne))
 	assert_that(_pickler.has_custom_class(CustomClassTwo))
-	assert_that(_pickler.has_native_class("SurfaceTool"))
+	assert_that(_pickler.has_native_class("Node2D"))
 	
 	var p2: Pickler = Pickler.new()
 
 	var assoc = _pickler.class_registry.get_associations()
 	p2.class_registry.add_name_to_id_associations(assoc)
-	p2.register_native_class("SurfaceTool")
+	p2.register_native_class("Node2D")
 	p2.register_custom_class(CustomClassTwo)
 	p2.register_custom_class(CustomClassOne)
 	assert_that(p2.has_custom_class(CustomClassOne))
 	assert_that(p2.has_custom_class(CustomClassTwo))
-	assert_that(p2.has_native_class("SurfaceTool"))
+	assert_that(p2.has_native_class("Node2D"))
 
 	for cls_name in _pickler.class_registry.by_name:
 		var cls1 = _pickler.class_registry.get_by_name(cls_name)
