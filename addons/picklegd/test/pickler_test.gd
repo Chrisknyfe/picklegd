@@ -143,4 +143,11 @@ func test_registered_getstate_setstate_newargs():
 	assert_float(u.baz).is_equal(data.baz)
 	assert_str(u.qux).is_not_equal(data.qux)
 
-	
+func test_instantiate_newargs_nativeobj():
+	var reg = _pickler.register_native_class("Node2D")
+	reg.__getnewargs__ = func(obj): return [Vector2(1,1)]
+	var n = Node2D.new()
+	var s = _pickler.pickle_str(n)
+	print(s)
+	await assert_error(func(): _pickler.unpickle_str(s)).is_push_warning("Cannot instantiate a native class with constructor arguments")
+	n.queue_free()
