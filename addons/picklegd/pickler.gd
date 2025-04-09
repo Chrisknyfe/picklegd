@@ -39,26 +39,60 @@ extends BasePickler
 ## For the full list of property flags the pickler considers when deciding if a property is safe
 ## to deserialize, see [constant BasePickler.PROP_WHITELIST] and
 ## [constant BasePickler.PROP_BLACKLIST].
+## [br][br]
 ## You can also have direct control over which properties are serialized/deserialized by adding
+## [code]__getnewargs__()[/code], 
 ## [code]__getstate__()[/code] and [code]__setstate__()[/code] methods to your custom class.
-## The Pickler will call [code]__getstate__()[/code] to retrieve an Object's properties during
+## The [Pickler] will first call [code]__getnewargs__()[/code] to get the arguments for the
+## object's constructor, then
+## will call [code]__getstate__()[/code] to retrieve an Object's properties during
 ## serialization, and later will call [code]__setstate__()[/code] to set an Object's properties
 ## during deserialization. You may also use these methods to perform
 ## input validation on an Object's properties.
+## [br][br]
+## [code]__getnewargs__()[/code] takes no arguments, and must return an [Array].
+## [br][br]
+## [code]__getstate__()[/code] takes no arguments, and must return a [Dictionary].
+## [br][br]
+## [code]__setstate__()[/code] takes one argument, the state [Dictionary], and has no return value.
+## [br][br]
 ## [br]For example:
 ## [codeblock lang=gdscript]
-## class_name CustomClassTwo
+## extends Resource
+## class_name CustomClassNewargs
 ##
-## const MAX_FOO: float = 5.0
-## var foo: float = 4.0
+## var foo: String = "bluh"
+## var baz: float = 4.0
+## var qux: String = "x"
+##
+## func _init(new_foo: String):
+##     foo = new_foo
+##
+## func __getnewargs__() -> Array:
+##     return [foo]
 ##
 ## func __getstate__() -> Dictionary:
-##     return {"foo": foo}
+##     return {"1": baz, "2": qux}
 ##
 ## func __setstate__(state: Dictionary):
-##     if foo <= MAX_FOO:
-##         foo = state["foo"]
+##     baz = state["1"]
+##     qux = state["2"]
 ## [/codeblock]
+## Finally, [Pickler] allows you to further override [code]__getnewargs__()[/code], 
+## [code]__getstate__()[/code] and [code]__setstate__()[/code] when you register
+## a class with the Pickler. For example:
+## [codeblock lang=gdscript]
+## var pickler := Pickler.new()
+## var reg := pickler.register_custom_class(CustomClassNewargs)
+## reg.__getnewargs__ = func(obj): return ["lambda_newarg!"]
+## reg.__getstate__ = func(obj): return {"baz": obj.baz}
+## reg.__setstate__ = func(obj, state): obj.baz = state["baz"]
+## var obj := CustomClassNewargs.new("constructor arg will be overwritten")
+## obj.qux = "won't be pickled."
+## var pickle = pickler.pickle(obj)
+## var plain_data = pickler.unpickle(pickle)
+## [/codeblock]
+##
 ## If you want more control over the objects and properties you pickle,
 ## you can extend [BasePickler] .
 
