@@ -99,16 +99,20 @@ func unpickle(buffer: PackedByteArray):
 	return post_unpickle(bytes_to_var(buffer))
 
 
-## Get an ID for this object's class. Defaults to returning the obj's class name
+## Get an ID for this object's class. 
+## Returns the obj's class name,
+## or null if there's no class name for this object.
 func get_object_class_id(obj: Object):
-	# return null if you don't want this object pickled
 	var scr: Script = obj.get_script()
+	var obj_class_name = null
 	if scr != null:
-		var gname: StringName = scr.get_global_name()
-		if gname.is_empty():
-			return null
-		return gname
-	return obj.get_class()
+		obj_class_name = scr.get_global_name()
+	else:
+		obj_class_name = obj.get_class()
+	if obj_class_name == null or obj_class_name.is_empty():
+		push_warning("Cannot get object class name: ", obj)
+		return null
+	return obj_class_name
 
 
 ## Create an instance of this class from its ID. Defaults to treating the id as a class name.
@@ -213,7 +217,6 @@ func pre_pickle(obj):
 		TYPE_DICTIONARY:
 			var out = {}
 			var d: Dictionary = obj as Dictionary
-			var fail_to_process = false
 			for key in d:
 				out[key] = pre_pickle(d[key])
 			retval = out
@@ -261,6 +264,7 @@ func post_unpickle(obj):
 				var newargs = []
 				if NEWARGS_KEY in dict:
 					newargs = dict[NEWARGS_KEY]
+				dict.erase(NEWARGS_KEY)
 				var out = instantiate_from_class_id(dict[CLASS_KEY], newargs)
 				if out == null:
 					if warn_on_missing_class:

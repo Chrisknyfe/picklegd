@@ -100,21 +100,22 @@ func has_native_class(cls_name: String) -> bool:
 	return class_registry.has_by_name(cls_name)
 
 
-## Get an ID for this object's class, if the class is registered
-func get_object_class_id(obj: Object):
-	var scr: Script = obj.get_script()
-	var obj_class_name = null
-	if scr != null:
-		obj_class_name = scr.get_global_name()
-	else:
-		obj_class_name = obj.get_class()
-	if obj_class_name == null or obj_class_name.is_empty():
-		push_warning("Cannot get object class name: ", obj)
+func get_object_registered_behavior(obj: Object) -> RegisteredClass:
+	var obj_class_name = super.get_object_class_id(obj)
+	if obj_class_name == null:
 		return null
 	if not class_registry.has_by_name(obj_class_name):
 		push_warning("Object class type unregistered: ", obj_class_name)
 		return null
 	var reg: RegisteredBehavior = class_registry.get_by_name(obj_class_name)
+	return reg
+
+
+## Get an ID for this object's class, if the class is registered
+func get_object_class_id(obj: Object):
+	var reg := get_object_registered_behavior(obj)
+	if reg == null:
+		return null
 	return reg.id
 
 
@@ -138,3 +139,32 @@ func instantiate_from_class_id(id, newargs: Array) -> Object:
 		if ClassDB.class_exists(reg.name):
 			return ClassDB.instantiate(reg.name)
 	return null
+	
+func get_object_state(obj: Object) -> Dictionary:
+	var reg := get_object_registered_behavior(obj)
+	if reg.has_getstate():
+		var dict = reg.__getstate__.call(obj)
+		for key in dict.keys():
+			dict[key] = pre_pickle(dict[key])
+		return dict
+	return super.get_object_state(obj)
+	
+
+func set_object_state(obj: Object, state: Dictionary):
+	var reg := get_object_registered_behavior(obj)
+	if reg.has_setstate():
+		for key in state:
+			state[key] = post_unpickle(state[key])
+		reg.__setstate__.call(obj, state)
+	else:
+		super.set_object_state(obj, state)
+		
+func get_object_newargs(obj: Object):
+	var reg := get_object_registered_behavior(obj)
+	if reg.has_getnewargs():
+		var newargs = reg.__getnewargs__.call(obj)
+		for i in range(len(newargs)):
+			newargs[i] = pre_pickle(newargs[i])
+		return newargs
+	return super.get_object_newargs(obj)
+	

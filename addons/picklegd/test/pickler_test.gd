@@ -119,7 +119,26 @@ func test_pickle_load_associations() -> void:
 
 func test_newargs():
 	_pickler.register_custom_class(CustomClassNewargs)
-	var s = _pickler.pickle_str(CustomClassNewargs.new("constructor_arg!"))
+	var data := CustomClassNewargs.new("constructor_arg!")
+	var s = _pickler.pickle_str(data)
 	print(s)
 	var u = _pickler.unpickle_str(s)
-	print(u)
+	print(u.foo)
+	assert_object(u).is_equal(data)
+	
+func test_registered_getstate_setstate_newargs():
+	var reg := _pickler.register_custom_class(CustomClassNewargs)
+	reg.__getnewargs__ = func(obj): return ["lambda_newarg!"]
+	reg.__getstate__ = func(obj): return {"baz": obj.baz}
+	reg.__setstate__ = func(obj, state): obj.baz = state["baz"]
+	var data = CustomClassNewargs.new("constructor_arg!")
+	data.qux = "just a whatever string this won't show up in the output."
+	var s = _pickler.pickle_str(data)
+	print(s)
+	var u = _pickler.unpickle_str(s)
+	print(u.qux)
+	assert_str(u.foo).is_not_equal(data.foo)
+	assert_float(u.baz).is_equal(data.baz)
+	assert_str(u.qux).is_not_equal(data.qux)
+
+	
