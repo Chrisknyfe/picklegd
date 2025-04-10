@@ -115,12 +115,12 @@ func unpickle(buffer: PackedByteArray):
 ## or null if there's no class name for this object.
 func get_object_class_id(obj: Object):
 	var scr: Script = obj.get_script()
-	var obj_class_name = null
+	var obj_class_name = ""
 	if scr != null:
 		obj_class_name = scr.get_global_name()
 	else:
 		obj_class_name = obj.get_class()
-	if obj_class_name == null or obj_class_name.is_empty():
+	if obj_class_name.is_empty():
 		push_warning("Cannot get object class id")
 		return null
 	return obj_class_name
