@@ -35,5 +35,5 @@ func test_refserializer_benchmark() -> void:
 	var s = null
 	var u = null
 	for i in range(ITERATIONS):
-		s = RefSerializer.serialize_object(bigdata)
-		u = RefSerializer.deserialize_object(s)
+		s = var_to_bytes(RefSerializer.serialize_object(bigdata))
+		u = RefSerializer.deserialize_object(bytes_to_var(s))
