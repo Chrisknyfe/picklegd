@@ -4,8 +4,6 @@ class_name BigClassChrisknyfe
 var foo: String = "bluh"
 var baz: float = 4.0
 var qux: String = "x"
-var ccone := CustomClassOne.new()
-var cctwo := CustomClassTwo.new()
 var builtins: Array = [
 	# refer to @GlobalScope.Variant.Type enum in Godot 4.4
 	null,
@@ -50,10 +48,3 @@ var builtins: Array = [
 ]
 
 var refcounteds := []
-
-func _init():
-	for i in range(10):
-		# regular old objects
-		refcounteds.append(CustomClassOne.new())
-		# objects with custom setstate / getstate
-		refcounteds.append(CustomClassTwo.new())
