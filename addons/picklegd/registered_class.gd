@@ -3,7 +3,7 @@ extends RegisteredBehavior
 ## A class type registered with a [Pickler].
 
 ## This points to a custom class script that can be instantiated.
-var custom_class_def: Object
+var custom_class_def: Script
 
 var __getstate__: Callable = Callable()
 var __setstate__: Callable = Callable()
