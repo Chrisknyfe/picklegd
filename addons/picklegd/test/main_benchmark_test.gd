@@ -3,19 +3,25 @@ extends Control
 @onready var pickler := Pickler.new()
 
 func _ready():
-	#benchmark_pickler()
-	#benchmark_refserializer()
-#
-	## automatically quit
-	#await get_tree().create_timer(1).timeout
-	#get_tree().quit()
-	pass
+	var p = benchmark_pickler()
+	var s = benchmark_refserializer()
+	var bytes_percent = "%.1f" % [float(p["bytes"]) * 100.0 / float(s["bytes"])]
+	var time_percent = "%.1f" % [float(p["msec"]) * 100.0 / float(s["msec"])]
+	print("PickleGD\t\t", p["bytes"], " bytes ", p["msec"], " msec")
+	print("RefSerializer\t", s["bytes"], " bytes ", s["msec"], " msec")
+	print("Pickle Perf%\t", bytes_percent, "% size ", time_percent, "% time compared to RefSerializer")
+
+	# automatically quit
+	await get_tree().create_timer(1).timeout
+	get_tree().quit()
+	#pass
 
 func _process(delta):
-	benchmark_pickler(1, 5)
-	benchmark_refserializer(1, 5)
+	#benchmark_pickler(1, 5)
+	#benchmark_refserializer(1, 5)
+	pass
 	
-func benchmark_pickler(iterations: int = 1000, subobjects: int = 10) -> void:
+func benchmark_pickler(iterations: int = 1000, subobjects: int = 10):
 	var start_ms = Time.get_ticks_msec()
 	pickler.class_registry.clear()
 	pickler.register_custom_class(CustomClassOne)
@@ -32,10 +38,10 @@ func benchmark_pickler(iterations: int = 1000, subobjects: int = 10) -> void:
 		p = pickler.pickle(bigdata)
 		u = pickler.unpickle(p)
 	var end_ms = Time.get_ticks_msec()
-	print("PickleGD\t\t", len(p), " bytes ", end_ms - start_ms, " msec")
+	return {"bytes":len(p), "msec":end_ms-start_ms}
 
 
-func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10) -> void:
+func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10):
 	var start_ms = Time.get_ticks_msec()
 	RefSerializer._types.clear()
 	RefSerializer.serialize_defaults = true
@@ -53,4 +59,4 @@ func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10) -> vo
 		s = var_to_bytes(RefSerializer.serialize_object(bigdata))
 		u = RefSerializer.deserialize_object(bytes_to_var(s))
 	var end_ms = Time.get_ticks_msec()
-	print("RefSerializer\t", len(s), " bytes ", end_ms - start_ms, " msec")
+	return {"bytes":len(s), "msec":end_ms-start_ms}
