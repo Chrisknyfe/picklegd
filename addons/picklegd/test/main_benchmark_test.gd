@@ -1,21 +1,21 @@
-# GdUnit generated TestSuite
-class_name BenchmarkTest
-extends GdUnitTestSuite
-@warning_ignore('unused_parameter')
-@warning_ignore('return_value_discarded')
-
-const __source = 'res://addons/picklegd/pickler.gd'
+extends Control
 
 const ITERATIONS = 1000
 const SUBOBJECTS = 10
 
-var pickler := Pickler.new()
+@onready var pickler := Pickler.new()
 
-func before():
+func _ready():
+	benchmark_pickler()
+	benchmark_refserializer()
+
+	# automatically quit
+	await get_tree().create_timer(1).timeout
+	get_tree().quit()
+
+func benchmark_pickler() -> void:
+	var start_ms = Time.get_ticks_msec()
 	pickler.class_registry.clear()
-	RefSerializer._types.clear()
-
-func test_pickler_benchmark() -> void:
 	pickler.register_custom_class(CustomClassOne)
 	pickler.register_custom_class(CustomClassTwo)
 	pickler.register_custom_class(BigClassChrisknyfe)
@@ -29,9 +29,13 @@ func test_pickler_benchmark() -> void:
 	for i in range(ITERATIONS):
 		p = pickler.pickle(bigdata)
 		u = pickler.unpickle(p)
-	print("PickleGD bytes: ", len(p))
+	var end_ms = Time.get_ticks_msec()
+	print("PickleGD\t\t", len(p), " bytes ", end_ms - start_ms, " msec")
 
-func test_refserializer_benchmark() -> void:
+
+func benchmark_refserializer() -> void:
+	var start_ms = Time.get_ticks_msec()
+	RefSerializer._types.clear()
 	RefSerializer.serialize_defaults = true
 	RefSerializer.register_type(&"CustomClassOne", CustomClassOne.new)
 	RefSerializer.register_type(&"CustomClassTwo", CustomClassTwo.new)
@@ -46,4 +50,5 @@ func test_refserializer_benchmark() -> void:
 	for i in range(ITERATIONS):
 		s = var_to_bytes(RefSerializer.serialize_object(bigdata))
 		u = RefSerializer.deserialize_object(bytes_to_var(s))
-	print("RefSerializer bytes: ", len(s))
+	var end_ms = Time.get_ticks_msec()
+	print("RefSerializer\t", len(s), " bytes ", end_ms - start_ms, " msec")
