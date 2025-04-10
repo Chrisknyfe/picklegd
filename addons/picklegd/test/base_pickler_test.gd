@@ -37,7 +37,7 @@ var _builtins = {
 		StringName("twenty_one"),
 		NodePath(),
 		#RID(), # type 23 rejected type because it's an internal ID
-		Object.new(),
+		#Object.new(),
 		#Callable(), # type 25 rejected type because it's code-over-the-wire
 		#Signal(), # type 26 rejected type because it's code-over-the-wire
 		Dictionary(),

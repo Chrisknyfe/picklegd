@@ -24,7 +24,7 @@
 			else:
 				object.set(property, value)
 	do I need to also assign to dictionaries?
-- I won't be using serialize_defaults
+- Consider using serialize_defaults
 - get_pickleable_properties() can be unrolled into the default getstate and setstate
 
 # TODO after seeing Seriously by freehuntx https://godotengine.org/asset-library/asset/2469

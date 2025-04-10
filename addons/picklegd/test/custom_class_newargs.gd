@@ -1,4 +1,4 @@
-extends Resource
+extends RefCounted
 class_name CustomClassNewargs
 
 var foo: String = "bluh"

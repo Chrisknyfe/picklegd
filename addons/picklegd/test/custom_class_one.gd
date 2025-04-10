@@ -1,4 +1,4 @@
-extends Resource
+extends RefCounted
 class_name CustomClassOne
 
 var foo: float = 1.0
