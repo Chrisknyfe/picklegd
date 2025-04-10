@@ -160,21 +160,7 @@ func instantiate_from_class_id(id, newargs: Array) -> Object:
 	if not class_registry.has_by_id(id):
 		push_warning("Object class ID unregistered: ", id)
 		return null
-	var reg: RegisteredClass = class_registry.get_by_id(id)
-	
-	# If the class requires constructor arguments, make sure newargs are provided
-	if reg.custom_class_def != null:
-		var argcount = reg.custom_class_def.new.get_argument_count()
-		if argcount > 0:
-			print("constructor argcount is ", argcount)
-		if reg.custom_class_def.has_method("__getnewargs__"):
-			print("classdef has newargs")
-		if reg.has_getnewargs():
-			print("registeredclass has newargs")
-			if newargs.is_empty():
-				push_warning("Class constructor expects newargs but none were provided")
-				return null
-	
+	var reg: RegisteredClass = class_registry.get_by_id(id)	
 	if not newargs.is_empty():
 		if reg.custom_class_def != null:
 			return reg.custom_class_def.callv("new", newargs)
