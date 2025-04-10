@@ -130,7 +130,6 @@ func get_object_class_id(obj: Object):
 ## Returns the new instance, or null if it couldn't be created.
 func instantiate_from_class_id(id, newargs: Array) -> Object:
 	var str_id = str(id)
-	
 	if not newargs.is_empty():
 		if ClassDB.class_exists(str_id):
 			# TODO: should I just ignore newargs and instantiate anyway?
@@ -214,9 +213,8 @@ func set_object_state(obj: Object, state: Dictionary):
 
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
-## Used by `pickle()` and `pickle_json()`.
+## Used by `pickle()` and `pickle_str()`.
 func pre_pickle(obj):
-	"""Recursively pickle all the objects in this arbitrary object hierarchy"""
 	if obj == null:
 		return null
 	var retval = null
@@ -258,9 +256,8 @@ func pre_pickle(obj):
 
 ## Post-process recently unpickled arbitrary GDScript data, instantiating custom
 ## classes and native classes from the appropriate dictionaries representing them.
-## Used by `unpickle()` and `unpickle_json()`
+## Used by `unpickle()` and `unpickle_str()`
 func post_unpickle(obj):
-	"""recursively unpickle all objects in this arbitrary object hierarchy."""
 	var retval = null
 	match typeof(obj):
 		# Rejected types

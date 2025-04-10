@@ -160,7 +160,7 @@ func instantiate_from_class_id(id, newargs: Array) -> Object:
 	if not class_registry.has_by_id(id):
 		push_warning("Object class ID unregistered: ", id)
 		return null
-	var reg: RegisteredClass = class_registry.get_by_id(id)	
+	var reg: RegisteredClass = class_registry.get_by_id(id)
 	if not newargs.is_empty():
 		if reg.custom_class_def != null:
 			return reg.custom_class_def.callv("new", newargs)
