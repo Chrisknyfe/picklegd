@@ -25,6 +25,7 @@
 	do I need to also assign to dictionaries?
 - Consider using serialize_defaults
 - get_pickleable_properties() can be unrolled into the default getstate and setstate
+- it might be valuable to make the Pickler a one-file script.
 
 # TODO after seeing Seriously by freehuntx https://godotengine.org/asset-library/asset/2469
 I don't like how he constructs a custom object by building source code. No.
