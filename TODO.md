@@ -3,7 +3,6 @@
 - Multiplayer Example: TCP server for larger packets in the example, UDP fragmentation starts at 1392 byte packets.
 
 # TODO after seeing KoBeWi's serializer: https://godotengine.org/asset-library/asset/3167
-- Benchmark performance and output byte size
 - roll registry back into Pickler, with no numeric ID's: only I use that feature for shortening block type names to numeric IDs in my game.
 - copy Registry back to my game, along with unit tests
 - remove BasePickler: we don't want a version that doesn't have a registry, that's a security hole. They can subclass Pickler if they like.

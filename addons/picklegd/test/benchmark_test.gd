@@ -20,9 +20,11 @@ func test_pickler_benchmark() -> void:
 	pickler.register_custom_class(BigClassChrisknyfe)
 	
 	var bigdata := BigClassChrisknyfe.new()
+	var p = null
+	var u = null
 	for i in range(ITERATIONS):
-		var p = pickler.pickle(bigdata)
-		var u = pickler.unpickle(p)
+		p = pickler.pickle(bigdata)
+		u = pickler.unpickle(p)
 
 func test_refserializer_benchmark() -> void:
 	RefSerializer.register_type(&"CustomClassOne", CustomClassOne.new)
@@ -30,6 +32,8 @@ func test_refserializer_benchmark() -> void:
 	RefSerializer.register_type(&"BigClassChrisknyfe", BigClassChrisknyfe.new)
 	
 	var bigdata: BigClassChrisknyfe = RefSerializer.create_object(&"BigClassChrisknyfe")
+	var s = null
+	var u = null
 	for i in range(ITERATIONS):
-		var s = RefSerializer.serialize_object(bigdata)
-		var u = RefSerializer.deserialize_object(s)
+		s = RefSerializer.serialize_object(bigdata)
+		u = RefSerializer.deserialize_object(s)
