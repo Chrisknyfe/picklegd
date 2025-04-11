@@ -114,6 +114,75 @@ const NEWARGS_KEY = "__NEW"
 var class_registry: Registry = Registry.new()
 
 
+
+## Get a name for this object's class. 
+## Returns the obj's class name,
+## or null if there's no class name for this object.
+func get_object_class_name(obj: Object) -> String:
+	var scr: Script = obj.get_script()
+	var clsname = &""
+	if scr != null:
+		clsname = scr.get_global_name()
+	else:
+		clsname = obj.get_class()
+	return clsname
+
+
+## Register a custom class that can be pickled with this pickler. Returns the
+## [RegisteredBehavior] object representing this custom class.
+func register_custom_class(scr: Script) -> RegisteredClass:
+	var gname := scr.get_global_name()
+	if gname.is_empty():
+		push_warning("Cannot get custom class name")
+		return null
+	
+	var rc = RegisteredClass.new()
+	rc.name = gname
+	
+	# Interrogate the class at registration time to speed up pickling / unpickling
+	rc.custom_class_def = scr
+	
+	rc.constructor = scr.new
+	
+	var methods = scr.get_script_method_list()
+	for method in methods:
+		if method.name == "__getnewargs__":
+			rc.class_has_getnewargs = true
+			rc.newargs_len = len(method.args)
+		if method.name == "__getstate__":
+			rc.class_has_getstate = true
+		if method.name == "__setstate__":
+			rc.class_has_setstate = true
+	
+	for prop in scr.get_script_property_list():
+		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
+			rc.allowed_properties[prop.name] = prop
+
+	return class_registry.register(rc) as RegisteredClass
+
+
+## Register a godot engine native class. 
+## cls_name must match the name returned by instance.class_name().
+## Returns the [RegisteredBehavior] object representing this native class.
+func register_native_class(cls_name: String) -> RegisteredClass:
+	if not ClassDB.class_exists(cls_name):
+		push_warning("Native class is not recognized: ", cls_name)
+		return null
+	if not ClassDB.can_instantiate(cls_name):
+		push_warning("Native class cannot be instantiated: ", cls_name)
+		return null
+		
+	var rc = RegisteredClass.new()
+	rc.name = cls_name
+	rc.custom_class_def = null
+	rc.constructor = ClassDB.instantiate.bind(cls_name)
+	for prop in ClassDB.class_get_property_list(cls_name):
+		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
+			rc.allowed_properties[prop.name] = prop
+	
+	return class_registry.register(rc) as RegisteredClass
+
+
 ## Pickle the arbitary GDScript data to a string.
 func pickle_str(obj) -> String:
 	return var_to_str(pre_pickle(obj))
@@ -133,187 +202,6 @@ func pickle(obj) -> PackedByteArray:
 func unpickle(buffer: PackedByteArray):
 	return post_unpickle(bytes_to_var(buffer))
 
-
-## Get an ID for this object's class. 
-## Returns the obj's class name,
-## or null if there's no class name for this object.
-func super_get_object_class_id(obj: Object):
-	var scr: Script = obj.get_script()
-	var obj_class_name = ""
-	if scr != null:
-		obj_class_name = scr.get_global_name()
-	else:
-		obj_class_name = obj.get_class()
-	if obj_class_name.is_empty():
-		push_warning("Cannot get object class id")
-		return null
-	return obj_class_name
-
-## Get properties that are safe to pickle for this class.
-## Properties such as the Object's "script" should be filtered out.
-func get_pickleable_properties(obj: Object):
-	var good_props = []
-	#print("props for class ", get_object_class_id(obj))
-	for prop in obj.get_property_list():
-		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			#print("keep prop ", prop.name, " :: ", prop.usage)
-			good_props.append(prop)
-		#else:
-		#print("---- prop ", prop.name, " :: ", prop.usage)
-	return good_props
-
-func super_get_object_newargs(obj: Object) -> Array:
-	if obj.has_method("__getnewargs__"):
-		var newargs = obj.__getnewargs__()
-		for i in range(len(newargs)):
-			newargs[i] = pre_pickle(newargs[i])
-		return newargs
-	return []
-
-
-## Get an object's state.
-## Calls an object's [code]__getstate__()[/code], if it has one.
-## Override this function if you want your extended pickler to
-## perform special behavior for getting an object's state.
-## Make sure to call [method BasePickler.pre_pickle] on all elements
-## of the dictionary before returning it.
-func super_get_object_state(obj: Object) -> Dictionary:
-	var dict = {}
-	if obj.has_method("__getstate__"):
-		# gdlint:ignore = private-method-call
-		dict = obj.__getstate__()
-	else:
-		for prop in get_pickleable_properties(obj):
-			dict[prop.name] = obj.get(prop.name)
-	for key in dict.keys():
-		dict[key] = pre_pickle(dict[key])
-	return dict
-
-
-## Set an object's state.
-## Calls an object's [code]__setstate__()[/code], if it has one.
-## Override this function if you want your extended pickler to
-## perform special behavior when setting an object's state.
-## Make sure to call [method BasePickler.post_unpickle] on all elements
-## of the state dictionary before setting state.
-func super_set_object_state(obj: Object, state: Dictionary):
-	if obj.has_method("__setstate__"):
-		# for users of __setstate__, just unpickle whatever they want,
-		# even if it's a bad idea.
-		for key in state:
-			state[key] = post_unpickle(state[key])
-		# gdlint:ignore = private-method-call
-		obj.__setstate__(state)
-	else:
-		# for Objects, only recursively unpickle allowed properties.
-		for prop in get_pickleable_properties(obj):
-			if state.has(prop.name):
-				obj.set(prop.name, post_unpickle(state[prop.name]))
-
-
-
-## Register a custom class that can be pickled with this pickler. Returns the
-## [RegisteredBehavior] object representing this custom class.
-func register_custom_class(c: Script) -> RegisteredClass:
-	"""Register a custom class."""
-	var rc = RegisteredClass.new()
-	var gname: StringName = c.get_global_name()
-	if gname.is_empty():
-		push_warning("Cannot get class name: ", c)
-		return null
-	rc.name = gname
-	rc.custom_class_def = c
-	return class_registry.register(rc) as RegisteredClass
-
-
-## Returns true if the custom class is registered with this pickler.
-func has_custom_class(c: Script) -> bool:
-	return class_registry.has_by_name(c.get_global_name())
-
-
-## Register a godot engine native class. Returns the
-## [RegisteredBehavior] object representing this native class.
-func register_native_class(cls_name: String) -> RegisteredClass:
-	"""Register a native class. cls_name must match the name returned by instance.class_name()"""
-	var rc = RegisteredClass.new()
-	rc.name = cls_name
-	rc.custom_class_def = null
-	return class_registry.register(rc) as RegisteredClass
-
-
-## Returns true if the native class is registered with this pickler.
-func has_native_class(cls_name: String) -> bool:
-	return class_registry.has_by_name(cls_name)
-
-
-func get_object_registered_behavior(obj: Object) -> RegisteredClass:
-	var obj_class_name = super_get_object_class_id(obj)
-	if obj_class_name == null:
-		return null
-	if not class_registry.has_by_name(obj_class_name):
-		push_warning("Object class type unregistered: ", obj_class_name)
-		return null
-	var reg: RegisteredBehavior = class_registry.get_by_name(obj_class_name)
-	return reg
-
-
-## Get an ID for this object's class, if the class is registered
-func get_object_class_id(obj: Object):
-	var reg := get_object_registered_behavior(obj)
-	if reg == null:
-		return null
-	return reg.id
-
-
-## Create an instance of this class from its ID, if the ID is registered.
-func instantiate_from_class_id(id, newargs: Array) -> Object:
-	if typeof(id) != TYPE_INT:
-		return null
-	if not class_registry.has_by_id(id):
-		push_warning("Object class ID unregistered: ", id)
-		return null
-	var reg: RegisteredClass = class_registry.get_by_id(id)
-	if not newargs.is_empty():
-		if reg.custom_class_def != null:
-			return reg.custom_class_def.callv("new", newargs)
-		if ClassDB.class_exists(reg.name):
-			push_warning("Cannot instantiate a native class with constructor arguments")
-			return null
-	else:
-		if reg.custom_class_def != null:
-			return reg.custom_class_def.new()
-		if ClassDB.class_exists(reg.name):
-			return ClassDB.instantiate(reg.name)
-	return null
-	
-func get_object_state(obj: Object) -> Dictionary:
-	var reg := get_object_registered_behavior(obj)
-	if reg.has_getstate():
-		var dict = reg.__getstate__.call(obj)
-		for key in dict.keys():
-			dict[key] = pre_pickle(dict[key])
-		return dict
-	return super_get_object_state(obj)
-	
-
-func set_object_state(obj: Object, state: Dictionary):
-	var reg := get_object_registered_behavior(obj)
-	if reg.has_setstate():
-		for key in state:
-			state[key] = post_unpickle(state[key])
-		reg.__setstate__.call(obj, state)
-	else:
-		super_set_object_state(obj, state)
-		
-func get_object_newargs(obj: Object) -> Array:
-	var reg := get_object_registered_behavior(obj)
-	if reg.has_getnewargs():
-		var newargs = reg.__getnewargs__.call(obj)
-		for i in range(len(newargs)):
-			newargs[i] = pre_pickle(newargs[i])
-		return newargs
-	return super_get_object_newargs(obj)
-	
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
 ## Used by `pickle()` and `pickle_str()`.
@@ -340,22 +228,44 @@ func pre_pickle(obj):
 			retval = out
 		# Objects - only registered objects get pickled
 		TYPE_OBJECT:
-			var obj_class_id = get_object_class_id(obj)
-
-			if obj_class_id == null:
-				retval = null
-			else:
-				var dict := get_object_state(obj)
-				dict[CLASS_KEY] = obj_class_id
-				var newargs := get_object_newargs(obj)
-				if not newargs.is_empty():
-					dict[NEWARGS_KEY] = newargs
-				retval = dict
+			retval = pre_pickle_object(obj)
 		# most builtin types are just passed through
 		_:
 			retval = obj
 	return retval
 
+func pre_pickle_object(obj: Object):
+	var clsname = get_object_class_name(obj)
+	if clsname.is_empty() or not clsname in class_registry.by_name:
+		return null
+	var reg: RegisteredClass = class_registry.by_name[clsname]
+	var dict = {}
+	if reg.class_has_getstate:
+		dict = obj.__getstate__()
+	elif not reg.getstate.is_null():
+		dict = reg.getstate.call(obj)
+	else:
+		for propname in reg.allowed_properties:
+			dict[propname] = obj.get(propname)
+	
+	# recursive pre_pickle of the state we just got
+	for key in dict:
+		dict[key] = pre_pickle(dict[key])
+	
+	dict[CLASS_KEY] = reg.id
+	
+	# TODO: test constructor args that have defaults
+	if reg.newargs_len > 0:
+		# TODO: this could be a call to a callable set at registration time
+		if reg.class_has_getnewargs:
+			dict[NEWARGS_KEY] = obj.__getnewargs__()
+			for i in range(len(dict[NEWARGS_KEY])):
+				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
+		elif not reg.getnewargs.is_null():
+			dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
+			for i in range(len(dict[NEWARGS_KEY])):
+				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
+	return dict
 
 ## Post-process recently unpickled arbitrary GDScript data, instantiating custom
 ## classes and native classes from the appropriate dictionaries representing them.
@@ -368,18 +278,9 @@ func post_unpickle(obj):
 			retval = null
 		# Collection Types - recursion!
 		TYPE_DICTIONARY:
-			var dict: Dictionary = obj as Dictionary
+			var dict := obj as Dictionary
 			if CLASS_KEY in dict:
-				var newargs = []
-				if NEWARGS_KEY in dict:
-					newargs = dict[NEWARGS_KEY]
-				dict.erase(NEWARGS_KEY)
-				var out = instantiate_from_class_id(dict[CLASS_KEY], newargs)
-				if out == null:
-					return null
-				dict.erase(CLASS_KEY)
-				set_object_state(out, dict)
-				retval = out
+				retval = post_unpickle_object(dict)
 			else:
 				# for plain Dictionaries, unpickle recursively
 				for key in dict:
@@ -395,3 +296,39 @@ func post_unpickle(obj):
 		_:
 			retval = obj
 	return retval
+
+## Post-process recently unpickled dictionary that represents an object.
+func post_unpickle_object(dict: Dictionary):
+	var clsid = dict[CLASS_KEY]
+	dict.erase(CLASS_KEY)	
+	if typeof(clsid) != TYPE_INT:
+		return null
+	if not clsid in class_registry.by_id:
+		return null
+	var reg: RegisteredClass = class_registry.by_id[clsid]
+	
+	var obj = null
+	if NEWARGS_KEY in dict:
+		if reg.class_has_getnewargs or not reg.getnewargs.is_null():
+			var newargs: Array = dict[NEWARGS_KEY]
+			newargs = newargs.map(post_unpickle)
+			obj = reg.constructor.callv(newargs)
+		dict.erase(NEWARGS_KEY)
+	else:
+		obj = reg.constructor.call()
+		
+	if obj != null:
+		if reg.class_has_setstate:
+			for key in dict:
+				dict[key] = post_unpickle(dict[key])
+			obj.__setstate__(dict)
+		elif not reg.setstate.is_null():
+			for key in dict:
+				dict[key] = post_unpickle(dict[key])
+			reg.setstate.call(obj, dict)
+		else:
+			for propname in reg.allowed_properties:
+				if dict.has(propname):
+					obj.set(propname, post_unpickle(dict[propname]))
+	return obj
+	

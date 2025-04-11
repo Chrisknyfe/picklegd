@@ -1,19 +1,18 @@
 class_name RegisteredClass
 extends RegisteredBehavior
 ## A class type registered with a [Pickler].
+## Contains everything needed to reconstruct an object of this type
 
-## This points to a custom class script that can be instantiated.
-var custom_class_def: Script
+var custom_class_def: Script = null
 
-var __getstate__: Callable = Callable()
-var __setstate__: Callable = Callable()
-var __getnewargs__: Callable = Callable()
+var constructor: Callable = Callable()
+var newargs_len: int = 0
 
-func has_getstate():
-	return not __getstate__.is_null()
-	
-func has_setstate():
-	return not __setstate__.is_null()
-	
-func has_getnewargs():
-	return not __getnewargs__.is_null()
+var class_has_getnewargs: bool = false
+var class_has_getstate: bool = false
+var class_has_setstate: bool = false
+var getnewargs: Callable = Callable()
+var getstate: Callable = Callable()
+var setstate: Callable = Callable()
+
+var allowed_properties: Dictionary = {}
