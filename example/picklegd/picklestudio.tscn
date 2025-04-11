@@ -56,6 +56,10 @@ offset_left = 24.0
 offset_top = 229.0
 offset_right = 338.0
 offset_bottom = 237.0
+max_value = 4.0
+step = 1.0
+value = 2.0
+rounded = true
 
 [node name="CheckButton" type="CheckButton" parent="."]
 layout_mode = 0
@@ -70,6 +74,7 @@ offset_left = 24.0
 offset_top = 277.0
 offset_right = 88.0
 offset_bottom = 308.0
+color = Color(0, 0, 1, 1)
 
 [connection signal="pressed" from="HBoxContainer/Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/DoubleButton" to="." method="_on_double_button_pressed"]

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="PickleGD"
-run/main_scene="uid://jinh50i3h2ls"
+run/main_scene="uid://dcau7piafrpib"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="uid://t6b3iqwfuvhd"
 
