@@ -2,9 +2,13 @@ extends Control
 
 @onready var pickler := Pickler.new()
 
+@export var iterations := 1000
+@export var subobjects := 10
+@export var serialize_defaults := true
+
 func _ready():
-	var p = benchmark_pickler()
-	var s = benchmark_refserializer()
+	var p = benchmark_pickler(iterations, subobjects, serialize_defaults)
+	var s = benchmark_refserializer(iterations, subobjects, serialize_defaults)
 	var bytes_percent = "%.1f" % [float(p["bytes"]) * 100.0 / float(s["bytes"])]
 	var time_percent = "%.1f" % [float(p["msec"]) * 100.0 / float(s["msec"])]
 	print("PickleGD\t\t", p["bytes"], " bytes ", p["msec"], " msec")
@@ -21,8 +25,9 @@ func _process(delta):
 	#benchmark_refserializer(1, 5)
 	pass
 	
-func benchmark_pickler(iterations: int = 1000, subobjects: int = 10):
+func benchmark_pickler(iterations: int = 1000, subobjects: int = 10, serialize_defaults: bool = true):
 	var start_ms = Time.get_ticks_msec()
+	pickler.serialize_defaults = serialize_defaults
 	pickler.class_registry.clear()
 	pickler.register_custom_class(CustomClassOne)
 	pickler.register_custom_class(CustomClassTwo)
@@ -31,7 +36,10 @@ func benchmark_pickler(iterations: int = 1000, subobjects: int = 10):
 	var bigdata := BigClassChrisknyfe.new()
 	for i in range(subobjects):
 		bigdata.refcounteds.append(CustomClassOne.new())
-		bigdata.refcounteds.append(CustomClassTwo.new())
+		if serialize_defaults:
+			bigdata.refcounteds.append(CustomClassTwo.new())
+		else:
+			bigdata.refcounteds.append(CustomClassOne.new())
 	var p = null
 	var u = null
 	for i in range(iterations):
@@ -41,10 +49,10 @@ func benchmark_pickler(iterations: int = 1000, subobjects: int = 10):
 	return {"bytes":len(p), "msec":end_ms-start_ms}
 
 
-func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10):
+func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10, serialize_defaults: bool = true):
 	var start_ms = Time.get_ticks_msec()
 	RefSerializer._types.clear()
-	RefSerializer.serialize_defaults = true
+	RefSerializer.serialize_defaults = serialize_defaults
 	RefSerializer.register_type(&"CustomClassOne", CustomClassOne.new)
 	RefSerializer.register_type(&"CustomClassTwo", CustomClassTwo.new)
 	RefSerializer.register_type(&"BigClassChrisknyfe", BigClassChrisknyfe.new)
@@ -52,7 +60,10 @@ func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10):
 	var bigdata: BigClassChrisknyfe = RefSerializer.create_object(&"BigClassChrisknyfe")
 	for i in range(subobjects):
 		bigdata.refcounteds.append(RefSerializer.create_object(&"CustomClassOne"))
-		bigdata.refcounteds.append(RefSerializer.create_object(&"CustomClassTwo"))
+		if serialize_defaults:
+			bigdata.refcounteds.append(RefSerializer.create_object(&"CustomClassTwo"))
+		else:
+			bigdata.refcounteds.append(RefSerializer.create_object(&"CustomClassOne"))
 	var s = null
 	var u = null
 	for i in range(iterations):

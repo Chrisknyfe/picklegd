@@ -5,3 +5,4 @@ pickler reunified,2484,80.0,178.1,,
 pickler refactored,2484,80.0,70.8,107.6,76.7
 pickler test passing,2484,80.0,86.7,87.2,85.9
 pickler getstate callables,2484,80.0,85.2,89.1,86.2
+pickler serialize defaults,2484,80.0,88.5,84.1,78.7

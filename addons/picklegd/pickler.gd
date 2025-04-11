@@ -113,7 +113,7 @@ const NEWARGS_KEY = "__NEW"
 ## Registry of classes that are allowed to be pickled.
 var class_registry: Registry = Registry.new()
 
-
+var serialize_defaults := false
 
 ## Get a name for this object's class. 
 ## Returns the obj's class name,
@@ -149,27 +149,35 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 	var rc = RegisteredClass.new()
 	rc.name = gname
 	
-	# Interrogate the class at registration time to speed up pickling / unpickling
-	rc.custom_class_def = scr
-	
+	# Interrogate the class at registration time to speed up pickling / unpickling	
 	rc.constructor = scr.new
 	
 	var methods = scr.get_script_method_list()
+	rc.serialize_defaults = serialize_defaults
 	for method in methods:
 		match method.name:
 			"_init":
 				rc.newargs_len = len(method.args)
+				if rc.newargs_len > 0:
+					rc.serialize_defaults = true
 			"__getnewargs__":
 				rc.getnewargs = _object_getnewargs
+				rc.serialize_defaults = true
 			"__getstate__":
 				rc.getstate = _object_getstate
+				rc.serialize_defaults = true
 			"__setstate__":
 				rc.setstate = _object_setstate
+				rc.serialize_defaults = true
 	
-	for prop in scr.get_script_property_list():
+	if rc.newargs_len == 0 and not rc.serialize_defaults:
+		rc.default_object = scr.new()
+	
+	var proplist = scr.get_script_property_list()
+	for prop in proplist:
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
 			rc.allowed_properties[prop.name] = prop
-
+	
 	return class_registry.register(rc) as RegisteredClass
 
 
@@ -186,7 +194,6 @@ func register_native_class(cls_name: String) -> RegisteredClass:
 		
 	var rc = RegisteredClass.new()
 	rc.name = cls_name
-	rc.custom_class_def = null
 	rc.constructor = ClassDB.instantiate.bind(cls_name)
 	for prop in ClassDB.class_get_property_list(cls_name):
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
@@ -263,8 +270,14 @@ func pre_pickle_object(obj: Object):
 	if not reg.getstate.is_null():
 		dict = reg.getstate.call(obj)
 	else:
-		for propname in reg.allowed_properties:
-			dict[propname] = obj.get(propname)
+		if reg.serialize_defaults:
+			for propname in reg.allowed_properties:
+				dict[propname] = obj.get(propname)
+		else:
+			for propname in reg.allowed_properties:
+				var value = obj.get(propname)
+				if value != reg.default_object.get(propname):
+					dict[propname] = obj.get(propname)
 	
 	# recursive pre_pickle of the state we just got
 	for key in dict:
