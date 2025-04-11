@@ -250,10 +250,10 @@ func pre_pickle_object(obj: Object):
 		return null
 	var reg: RegisteredClass = class_registry.by_name[clsname]
 	var dict = {}
-	if reg.class_has_getstate:
-		dict = obj.__getstate__()
-	elif not reg.getstate.is_null():
+	if not reg.getstate.is_null():
 		dict = reg.getstate.call(obj)
+	elif reg.class_has_getstate:
+		dict = obj.__getstate__()
 	else:
 		for propname in reg.allowed_properties:
 			dict[propname] = obj.get(propname)
@@ -267,12 +267,12 @@ func pre_pickle_object(obj: Object):
 	# TODO: test constructor args that have defaults
 	if reg.newargs_len > 0:
 		# TODO: this could be a call to a callable set at registration time
-		if reg.class_has_getnewargs:
-			dict[NEWARGS_KEY] = obj.__getnewargs__()
+		if not reg.getnewargs.is_null():
+			dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
 			for i in range(len(dict[NEWARGS_KEY])):
 				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
-		elif not reg.getnewargs.is_null():
-			dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
+		elif reg.class_has_getnewargs:
+			dict[NEWARGS_KEY] = obj.__getnewargs__()
 			for i in range(len(dict[NEWARGS_KEY])):
 				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
 	return dict
@@ -328,14 +328,14 @@ func post_unpickle_object(dict: Dictionary):
 		obj = reg.constructor.call()
 		
 	if obj != null:
-		if reg.class_has_setstate:
-			for key in dict:
-				dict[key] = post_unpickle(dict[key])
-			obj.__setstate__(dict)
-		elif not reg.setstate.is_null():
+		if not reg.setstate.is_null():
 			for key in dict:
 				dict[key] = post_unpickle(dict[key])
 			reg.setstate.call(obj, dict)
+		elif reg.class_has_setstate:
+			for key in dict:
+				dict[key] = post_unpickle(dict[key])
+			obj.__setstate__(dict)
 		else:
 			for propname in reg.allowed_properties:
 				if dict.has(propname):

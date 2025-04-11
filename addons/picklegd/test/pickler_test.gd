@@ -46,7 +46,7 @@ var _builtins = {
 		StringName("twenty_one"),
 		NodePath(),
 		#RID(), # type 23 rejected type because it's an internal ID
-		#Object.new(),
+		#Object.new(), # type 24 is the entire point of the Pickler!
 		#Callable(), # type 25 rejected type because it's code-over-the-wire
 		#Signal(), # type 26 rejected type because it's code-over-the-wire
 		Dictionary(),
@@ -71,8 +71,6 @@ var _resources = {
 }
 var _customs = {
 	"one": CustomClassOne.new(),
-	#"two": CustomClassTwo.new(),
-	#"3": CustomClassTwo.new(), # won't be equal
 	"unsafe": TestFormUnsafe.new(),
 }
 var _misc = {
@@ -173,16 +171,6 @@ func test_roundtrip_misc() -> void:
 	roundtrip(_misc)
 
 
-
-func test_pickle_roudtrip() -> void:
-	_pickler.register_custom_class(CustomClassOne)
-	_pickler.register_custom_class(CustomClassTwo)
-	_pickler.register_native_class("Node2D")
-	assert_that(_pickler.has_custom_class(CustomClassOne))
-	assert_that(_pickler.has_custom_class(CustomClassTwo))
-	assert_that(_pickler.has_native_class("Node2D"))
-	
-	roundtrip(_data)
 	
 func test_pickle_getstate_setstate():
 	_pickler.register_custom_class(CustomClassTwo)
@@ -277,8 +265,11 @@ func test_instantiate_newargs_nativeobj():
 	var n = Node2D.new()
 	var s = _pickler.pickle_str(n)
 	print(s)
-	await assert_error(func(): _pickler.unpickle_str(s)).is_push_warning("Cannot instantiate a native class with constructor arguments")
+	var u = _pickler.unpickle_str(s)
+	print(u)
+	assert_object(u).is_equal(n)
 	n.queue_free()
+	u.queue_free()
 	
 
 ## You can't pickle an instance of an inline class. 
