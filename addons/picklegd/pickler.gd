@@ -114,6 +114,8 @@ var class_registry: Registry = Registry.new()
 
 var serialize_defaults := false
 
+var compression_mode: FileAccess.CompressionMode = FileAccess.COMPRESSION_DEFLATE 
+
 ## Get a name for this object's class. 
 ## Returns the obj's class name,
 ## or null if there's no class name for this object.
@@ -227,6 +229,21 @@ func pickle(obj) -> PackedByteArray:
 ## Unpickle the PackedByteArray to arbitrary GDScript data.
 func unpickle(buffer: PackedByteArray):
 	return post_unpickle(bytes_to_var(buffer))
+	
+
+## Pickle the arbitary GDScript data to a PackedByteArray.
+func pickle_compressed(obj) -> PackedByteArray:
+	return var_to_bytes(pre_pickle(obj)).compress(compression_mode)
+
+
+## Unpickle the PackedByteArray to arbitrary GDScript data.
+func unpickle_compressed(buffer: PackedByteArray, buffer_size: int = -1):
+	var decomp: PackedByteArray
+	if buffer_size > 0:
+		decomp = buffer.decompress(buffer_size, compression_mode)
+	else:
+		decomp = buffer.decompress_dynamic(-1, compression_mode)
+	return post_unpickle(bytes_to_var(decomp))
 
 
 ## Preprocess arbitrary GDScript data, converting classes to appropriate dictionaries.
