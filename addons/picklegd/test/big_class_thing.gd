@@ -1,5 +1,5 @@
 extends RefCounted
-class_name BigClassChrisknyfe
+class_name BigClassThing
 
 var foo: String = "bluh"
 var baz: float = 4.0

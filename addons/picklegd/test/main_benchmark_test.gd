@@ -11,8 +11,12 @@ func _ready():
 	var s = benchmark_refserializer(iterations, subobjects, serialize_defaults)
 	var bytes_percent = "%.1f" % [float(p["bytes"]) * 100.0 / float(s["bytes"])]
 	var time_percent = "%.1f" % [float(p["msec"]) * 100.0 / float(s["msec"])]
+	print("Serialize defaults: ", serialize_defaults)
+	print("serialize/deserialize roundtrip iterations: ", iterations)
+	print()
 	print("PickleGD\t\t", p["bytes"], " bytes ", p["msec"], " msec")
 	print("RefSerializer\t", s["bytes"], " bytes ", s["msec"], " msec")
+	print()
 	print("Pickle Perf%\t", bytes_percent, "% size ", time_percent, "% time compared to RefSerializer")
 
 	# automatically quit
@@ -31,9 +35,9 @@ func benchmark_pickler(iterations: int = 1000, subobjects: int = 10, serialize_d
 	pickler.class_registry.clear()
 	pickler.register_custom_class(CustomClassOne)
 	pickler.register_custom_class(CustomClassTwo)
-	pickler.register_custom_class(BigClassChrisknyfe)
+	pickler.register_custom_class(BigClassThing)
 	
-	var bigdata := BigClassChrisknyfe.new()
+	var bigdata := BigClassThing.new()
 	for i in range(subobjects):
 		bigdata.refcounteds.append(CustomClassOne.new())
 		if serialize_defaults:
@@ -55,9 +59,9 @@ func benchmark_refserializer(iterations: int = 1000, subobjects: int = 10, seria
 	RefSerializer.serialize_defaults = serialize_defaults
 	RefSerializer.register_type(&"CustomClassOne", CustomClassOne.new)
 	RefSerializer.register_type(&"CustomClassTwo", CustomClassTwo.new)
-	RefSerializer.register_type(&"BigClassChrisknyfe", BigClassChrisknyfe.new)
+	RefSerializer.register_type(&"BigClassThing", BigClassThing.new)
 	
-	var bigdata: BigClassChrisknyfe = RefSerializer.create_object(&"BigClassChrisknyfe")
+	var bigdata: BigClassThing = RefSerializer.create_object(&"BigClassThing")
 	for i in range(subobjects):
 		bigdata.refcounteds.append(RefSerializer.create_object(&"CustomClassOne"))
 		if serialize_defaults:
