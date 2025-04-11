@@ -7,18 +7,6 @@ var picklejar_pickle_fancy = preload("res://addons/picklegd/picklejar_pickle_fan
 
 func _enter_tree():
 	add_custom_type(
-		"BasePickler",
-		"Refcounted",
-		preload("res://addons/picklegd/base_pickler.gd"),
-		picklejar_pickle_fancy
-	)
-	add_custom_type(
-		"Pickler",
-		"BasePickler",
-		preload("res://addons/picklegd/pickler.gd"),
-		picklejar_pickle_fancy
-	)
-	add_custom_type(
 		"Registry",
 		"Refcounted",
 		preload("res://addons/picklegd/registry.gd"),
@@ -36,10 +24,15 @@ func _enter_tree():
 		preload("res://addons/picklegd/registered_class.gd"),
 		pickle_nojar
 	)
+	add_custom_type(
+		"Pickler",
+		"RefCounted",
+		preload("res://addons/picklegd/pickler.gd"),
+		picklejar_pickle_fancy
+	)
 
 
 func _exit_tree():
-	remove_custom_type("BasePickler")
 	remove_custom_type("Pickler")
 	remove_custom_type("Registry")
 	remove_custom_type("RegisteredBehavior")

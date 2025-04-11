@@ -22,7 +22,8 @@ extends RefCounted
 ## [br] -  Filtering out unsafe properties, such as "script" or "script/source"
 ## [br] -  Only serializing class types that you deliberately register with the Pickler
 ## [br] -  Allowing you fine-grained control over serialized data using
-## [code]__getstate__()[/code] and [code]__setstate__()[/code] methods you provide.
+## [code]__getstate__()[/code], [code]__setstate__()[/code] and
+## [code]__getnewargs__()[/code] methods you provide.
 ## [br][br]
 ## To pickle an object using a [Pickler], first register that object's class
 ## by calling [method Pickler.register_custom_class] or [method Pickler.register_native_class].
@@ -37,8 +38,8 @@ extends RefCounted
 ## [/codeblock]
 ## By default an Object's storage and script properties will be serialized and deserialized.
 ## For the full list of property flags the pickler considers when deciding if a property is safe
-## to deserialize, see [constant BasePickler.PROP_WHITELIST] and
-## [constant BasePickler.PROP_BLACKLIST].
+## to deserialize, see [constant Pickler.PROP_WHITELIST] and
+## [constant Pickler.PROP_BLACKLIST].
 ## [br][br]
 ## You can also have direct control over which properties are serialized/deserialized by adding
 ## [code]__getnewargs__()[/code], 
@@ -93,8 +94,6 @@ extends RefCounted
 ## var plain_data = pickler.unpickle(pickle)
 ## [/codeblock]
 ##
-## If you want more control over the objects and properties you pickle,
-## you can extend [BasePickler] .
 
 
 const PROP_WHITELIST: PropertyUsageFlags = (
@@ -161,13 +160,13 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 				if rc.newargs_len > 0:
 					rc.serialize_defaults = true
 			"__getnewargs__":
-				rc.getnewargs = _object_getnewargs
+				rc.__getnewargs__ = _object_getnewargs
 				rc.serialize_defaults = true
 			"__getstate__":
-				rc.getstate = _object_getstate
+				rc.__getstate__ = _object_getstate
 				rc.serialize_defaults = true
 			"__setstate__":
-				rc.setstate = _object_setstate
+				rc.__setstate__ = _object_setstate
 				rc.serialize_defaults = true
 	
 	if rc.newargs_len == 0 and not rc.serialize_defaults:
@@ -267,8 +266,8 @@ func pre_pickle_object(obj: Object):
 		return null
 	var reg: RegisteredClass = class_registry.by_name[clsname]
 	var dict = {}
-	if not reg.getstate.is_null():
-		dict = reg.getstate.call(obj)
+	if not reg.__getstate__.is_null():
+		dict = reg.__getstate__.call(obj)
 	else:
 		if reg.serialize_defaults:
 			for propname in reg.allowed_properties:
@@ -286,8 +285,8 @@ func pre_pickle_object(obj: Object):
 	dict[CLASS_KEY] = reg.id
 	
 	# TODO: test constructor args that have defaults
-	if reg.newargs_len > 0 and not reg.getnewargs.is_null():
-		dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
+	if reg.newargs_len > 0 and not reg.__getnewargs__.is_null():
+		dict[NEWARGS_KEY] = reg.__getnewargs__.call(obj)
 		for i in range(len(dict[NEWARGS_KEY])):
 			dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
 	return dict
@@ -334,7 +333,7 @@ func post_unpickle_object(dict: Dictionary):
 	
 	var obj = null
 	if NEWARGS_KEY in dict:
-		if reg.newargs_len > 0 and not reg.getnewargs.is_null():
+		if reg.newargs_len > 0 and not reg.__getnewargs__.is_null():
 			var newargs: Array = dict[NEWARGS_KEY]
 			newargs = newargs.map(post_unpickle)
 			obj = reg.constructor.callv(newargs)
@@ -343,10 +342,10 @@ func post_unpickle_object(dict: Dictionary):
 		obj = reg.constructor.call()
 		
 	if obj != null:
-		if not reg.setstate.is_null():
+		if not reg.__setstate__.is_null():
 			for key in dict:
 				dict[key] = post_unpickle(dict[key])
-			reg.setstate.call(obj, dict)
+			reg.__setstate__.call(obj, dict)
 		else:
 			for propname in reg.allowed_properties:
 				if dict.has(propname):

@@ -6,9 +6,14 @@ extends RegisteredBehavior
 var constructor: Callable = Callable()
 var newargs_len: int = 0
 
-var getnewargs: Callable = Callable()
-var getstate: Callable = Callable()
-var setstate: Callable = Callable()
+## func __getnewargs__(obj: Object) -> Array
+var __getnewargs__: Callable = Callable()
+
+## func __getstate__(obj: Object) -> Dictionary
+var __getstate__: Callable = Callable()
+
+## func __setstate__(obj: Object, state: Dictionary) -> void
+var __setstate__: Callable = Callable()
 
 var allowed_properties: Dictionary = {}
 

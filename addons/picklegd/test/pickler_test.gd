@@ -246,9 +246,9 @@ func test_newargs():
 	
 func test_registered_getstate_setstate_newargs():
 	var reg := _pickler.register_custom_class(CustomClassNewargs)
-	reg.getnewargs = func(obj): return ["lambda_newarg!"]
-	reg.getstate = func(obj): return {"baz": obj.baz}
-	reg.setstate = func(obj, state): obj.baz = state["baz"]
+	reg.__getnewargs__ = func(obj): return ["lambda_newarg!"]
+	reg.__getstate__ = func(obj): return {"baz": obj.baz}
+	reg.__setstate__ = func(obj, state): obj.baz = state["baz"]
 	var data = CustomClassNewargs.new("constructor_arg!")
 	data.qux = "just a whatever string this won't show up in the output."
 	var s = _pickler.pickle_str(data)
@@ -261,7 +261,7 @@ func test_registered_getstate_setstate_newargs():
 
 func test_instantiate_newargs_nativeobj():
 	var reg = _pickler.register_native_class("Node2D")
-	reg.getnewargs = func(obj): return [Vector2(1,1)]
+	reg.__getnewargs__ = func(obj): return [Vector2(1,1)]
 	var n = Node2D.new()
 	var s = _pickler.pickle_str(n)
 	print(s)
