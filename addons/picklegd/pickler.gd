@@ -126,6 +126,16 @@ func get_object_class_name(obj: Object) -> String:
 	else:
 		clsname = obj.get_class()
 	return clsname
+	
+func _object_getnewargs(obj: Object) -> Array:
+	return obj.__getnewargs__()
+	
+func _object_getstate(obj: Object) -> Dictionary:
+	return obj.__getstate__()
+	
+func _object_setstate(obj: Object, state: Dictionary) -> void:
+	obj.__setstate__(state)
+	
 
 
 ## Register a custom class that can be pickled with this pickler. Returns the
@@ -150,11 +160,11 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 			"_init":
 				rc.newargs_len = len(method.args)
 			"__getnewargs__":
-				rc.class_has_getnewargs = true
+				rc.getnewargs = _object_getnewargs
 			"__getstate__":
-				rc.class_has_getstate = true
+				rc.getstate = _object_getstate
 			"__setstate__":
-				rc.class_has_setstate = true
+				rc.setstate = _object_setstate
 	
 	for prop in scr.get_script_property_list():
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
@@ -252,8 +262,6 @@ func pre_pickle_object(obj: Object):
 	var dict = {}
 	if not reg.getstate.is_null():
 		dict = reg.getstate.call(obj)
-	elif reg.class_has_getstate:
-		dict = obj.__getstate__()
 	else:
 		for propname in reg.allowed_properties:
 			dict[propname] = obj.get(propname)
@@ -265,16 +273,10 @@ func pre_pickle_object(obj: Object):
 	dict[CLASS_KEY] = reg.id
 	
 	# TODO: test constructor args that have defaults
-	if reg.newargs_len > 0:
-		# TODO: this could be a call to a callable set at registration time
-		if not reg.getnewargs.is_null():
-			dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
-			for i in range(len(dict[NEWARGS_KEY])):
-				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
-		elif reg.class_has_getnewargs:
-			dict[NEWARGS_KEY] = obj.__getnewargs__()
-			for i in range(len(dict[NEWARGS_KEY])):
-				dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
+	if reg.newargs_len > 0 and not reg.getnewargs.is_null():
+		dict[NEWARGS_KEY] = reg.getnewargs.call(obj)
+		for i in range(len(dict[NEWARGS_KEY])):
+			dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
 	return dict
 
 ## Post-process recently unpickled arbitrary GDScript data, instantiating custom
@@ -319,7 +321,7 @@ func post_unpickle_object(dict: Dictionary):
 	
 	var obj = null
 	if NEWARGS_KEY in dict:
-		if reg.class_has_getnewargs or not reg.getnewargs.is_null():
+		if reg.newargs_len > 0 and not reg.getnewargs.is_null():
 			var newargs: Array = dict[NEWARGS_KEY]
 			newargs = newargs.map(post_unpickle)
 			obj = reg.constructor.callv(newargs)
@@ -332,13 +334,8 @@ func post_unpickle_object(dict: Dictionary):
 			for key in dict:
 				dict[key] = post_unpickle(dict[key])
 			reg.setstate.call(obj, dict)
-		elif reg.class_has_setstate:
-			for key in dict:
-				dict[key] = post_unpickle(dict[key])
-			obj.__setstate__(dict)
 		else:
 			for propname in reg.allowed_properties:
 				if dict.has(propname):
 					obj.set(propname, post_unpickle(dict[propname]))
 	return obj
-	
