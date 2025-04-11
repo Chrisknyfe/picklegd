@@ -146,13 +146,15 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 	
 	var methods = scr.get_script_method_list()
 	for method in methods:
-		if method.name == "__getnewargs__":
-			rc.class_has_getnewargs = true
-			rc.newargs_len = len(method.args)
-		if method.name == "__getstate__":
-			rc.class_has_getstate = true
-		if method.name == "__setstate__":
-			rc.class_has_setstate = true
+		match method.name:
+			"_init":
+				rc.newargs_len = len(method.args)
+			"__getnewargs__":
+				rc.class_has_getnewargs = true
+			"__getstate__":
+				rc.class_has_getstate = true
+			"__setstate__":
+				rc.class_has_setstate = true
 	
 	for prop in scr.get_script_property_list():
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
@@ -182,6 +184,14 @@ func register_native_class(cls_name: String) -> RegisteredClass:
 	
 	return class_registry.register(rc) as RegisteredClass
 
+func has_custom_class(scr: Script) -> bool:
+	var gname := scr.get_global_name()
+	if gname.is_empty():
+		return false
+	return class_registry.has_by_name(gname)
+	
+func has_native_class(cls_name: String):
+	return class_registry.has_by_name(cls_name)
 
 ## Pickle the arbitary GDScript data to a string.
 func pickle_str(obj) -> String:
