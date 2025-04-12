@@ -13,6 +13,8 @@ extends RefCounted
 ## [br][br]
 ## If you pass a [RegisteredObject] to [method Registry.register], 
 ## the Registry will automatically assign the name and ID for you.
+## [br][br]
+## Inspired by [url]https://nekoyue.github.io/ForgeJavaDocs-NG/javadoc/1.16.5/net/minecraftforge/registries/ForgeRegistry.html[/url]
 
 const ID_INVALID = -1
 
@@ -70,23 +72,7 @@ func register(name: StringName, obj: Variant = null) -> int:
 		obj.name = name
 		obj.id = new_id
 	return new_id
-	
-func is_entry_valid(name:StringName) -> bool:
-	if name.is_empty():
-		return false
-	if name not in by_name or name not in name_to_id:
-		return false
-	var id = name_to_id[name]
-	if id not in by_id or id not in id_to_name:
-		return false
-	if id_to_name[id] != name:
-		return false
-	if not is_same(by_name[name], by_id[id]):
-		return false
-	if by_name[name] is RegisteredObject:
-		if by_name[name].name != name or by_name[name].id != id:
-			return false
-	return true
+
 
 func unregister(name: StringName) -> bool:
 	#if not is_entry_valid(name):
@@ -186,33 +172,31 @@ func get_associations() -> Dictionary[StringName, int]:
 	return name_to_id
 
 
+func is_entry_valid(name:StringName) -> bool:
+	if name.is_empty():
+		return false
+	if name not in by_name or name not in name_to_id:
+		return false
+	var id = name_to_id[name]
+	if id not in by_id or id not in id_to_name:
+		return false
+	if id_to_name[id] != name:
+		return false
+	if not is_same(by_name[name], by_id[id]):
+		return false
+	if by_name[name] is RegisteredObject:
+		if by_name[name].name != name or by_name[name].id != id:
+			return false
+	return true
+
 ## Check that this entire table is valid. There's a lot of moving parts.
 ## Returns true if all internal tables are consistent.
 func is_valid() -> bool:
 	var s = by_name.size()
 	if by_id.size() != s or name_to_id.size() != s or id_to_name.size() != s:
 		return false
-	
 	for name in by_name:
 		if not is_entry_valid(name):
 			return false
-	
-	# Do I need to do any of the following checks for remaining names / id's ?
-	#var remaining_by_name = by_name.duplicate()
-	#var remaining_by_id = by_id.duplicate()
-	#var remaining_name_to_id = name_to_id.duplicate()
-	#var remaining_id_to_name = id_to_name.duplicate()
-	#for name in by_name:
-		#var id = name_to_id[name]
-		#remaining_by_name.erase(name)
-		#remaining_by_id.erase(id)
-		#remaining_name_to_id.erase(name)
-		#remaining_id_to_name.erase(id)
-	#
-	#if len(remaining_by_name) > 0 or \
-		#len(remaining_by_id) > 0 or \
-		#len(remaining_name_to_id) > 0 or \
-		#len(remaining_name_to_id) > 0:
-		#return false
 	return true
 	
