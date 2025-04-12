@@ -141,13 +141,13 @@ func _object_setstate(obj: Object, state: Dictionary) -> void:
 
 ## Register a custom class that can be pickled with this pickler. Returns the
 ## [RegisteredBehavior] object representing this custom class.
-func register_custom_class(scr: Script) -> RegisteredClass:
+func register_custom_class(scr: Script) -> PicklableClass:
 	var gname := scr.get_global_name()
 	if gname.is_empty():
 		push_warning("Cannot get custom class name")
 		return null
 	
-	var rc = RegisteredClass.new()
+	var rc = PicklableClass.new()
 	rc.name = gname
 	
 	# Interrogate the class at registration time to speed up pickling / unpickling	
@@ -185,7 +185,7 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 ## Register a godot engine native class. 
 ## cls_name must match the name returned by instance.class_name().
 ## Returns the [RegisteredBehavior] object representing this native class.
-func register_native_class(cls_name: String) -> RegisteredClass:
+func register_native_class(cls_name: String) -> PicklableClass:
 	if not ClassDB.class_exists(cls_name):
 		push_warning("Native class is not recognized: ", cls_name)
 		return null
@@ -193,7 +193,7 @@ func register_native_class(cls_name: String) -> RegisteredClass:
 		push_warning("Native class cannot be instantiated: ", cls_name)
 		return null
 		
-	var rc = RegisteredClass.new()
+	var rc = PicklableClass.new()
 	rc.name = cls_name
 	rc.constructor = ClassDB.instantiate.bind(cls_name)
 	for prop in ClassDB.class_get_property_list(cls_name):
@@ -282,7 +282,7 @@ func pre_pickle_object(obj: Object):
 	var clsname = get_object_class_name(obj)
 	if clsname.is_empty() or not clsname in class_registry.by_name:
 		return null
-	var reg: RegisteredClass = class_registry.by_name[clsname]
+	var reg: PicklableClass = class_registry.by_name[clsname]
 	var dict = {}
 	if not reg.__getstate__.is_null():
 		dict = reg.__getstate__.call(obj)
@@ -347,7 +347,7 @@ func post_unpickle_object(dict: Dictionary):
 		return null
 	if not clsid in class_registry.by_id:
 		return null
-	var reg: RegisteredClass = class_registry.by_id[clsid]
+	var reg: PicklableClass = class_registry.by_id[clsid]
 	
 	var obj = null
 	if NEWARGS_KEY in dict:

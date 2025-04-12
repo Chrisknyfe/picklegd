@@ -1,4 +1,4 @@
-class_name RegisteredClass
+class_name PicklableClass
 extends RegisteredObject
 ## A class type registered with a [Pickler].
 ## Contains everything needed to reconstruct an object of this type

@@ -3,25 +3,26 @@ extends EditorPlugin
 
 var pickle_nojar = preload("res://addons/picklegd/pickle_nojar.svg")
 var picklejar_pickle_fancy = preload("res://addons/picklegd/picklejar_pickle_fancy.svg")
+var picklejar_empty = preload("res://addons/picklegd/picklejar_empty_2.svg")
 
 
 func _enter_tree():
 	add_custom_type(
-		"Registry",
-		"Refcounted",
-		preload("res://addons/picklegd/registry.gd"),
-		preload("res://addons/picklegd/picklejar_empty_2.svg")
-	)
-	add_custom_type(
-		"RegisteredBehavior",
+		"RegisteredObject",
 		"Resource",
-		preload("res://addons/picklegd/registered_behavior.gd"),
+		preload("res://addons/picklegd/registered_object.gd"),
 		pickle_nojar
 	)
 	add_custom_type(
-		"RegisteredClass",
+		"Registry",
+		"Refcounted",
+		preload("res://addons/picklegd/registry.gd"),
+		picklejar_empty
+	)
+	add_custom_type(
+		"PicklableClass",
 		"RegisteredBehavior",
-		preload("res://addons/picklegd/registered_class.gd"),
+		preload("res://addons/picklegd/picklable_class.gd"),
 		pickle_nojar
 	)
 	add_custom_type(
@@ -34,6 +35,6 @@ func _enter_tree():
 
 func _exit_tree():
 	remove_custom_type("Pickler")
+	remove_custom_type("PicklableClass")
 	remove_custom_type("Registry")
-	remove_custom_type("RegisteredBehavior")
-	remove_custom_type("RegisteredClass")
+	remove_custom_type("RegisteredObject")
