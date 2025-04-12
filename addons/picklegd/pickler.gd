@@ -105,8 +105,8 @@ const PROP_BLACKLIST: PropertyUsageFlags = (
 	| PROPERTY_USAGE_NEVER_DUPLICATE
 	| PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT
 )
-const CLASS_KEY = "__CLS"
-const NEWARGS_KEY = "__NEW"
+const CLASS_KEY := &"__CLS"
+const NEWARGS_KEY := &"__NEW"
 
 
 ## registry of classes that are allowed to be pickled.
@@ -148,7 +148,6 @@ func register_custom_class(scr: Script) -> PicklableClass:
 		return null
 	
 	var pc := PicklableClass.new()
-	#pc.name = clsname
 	
 	# Interrogate the class at registration time to speed up pickling / unpickling	
 	pc.constructor = scr.new
@@ -177,7 +176,7 @@ func register_custom_class(scr: Script) -> PicklableClass:
 	var proplist = scr.get_script_property_list()
 	for prop in proplist:
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			pc.allowed_properties[prop.name] = prop
+			pc.allowed_properties[prop.name] = true # prop
 	class_registry[clsname] = pc
 	return pc
 
@@ -194,11 +193,10 @@ func register_native_class(clsname: StringName) -> PicklableClass:
 		return null
 		
 	var pc := PicklableClass.new()
-	#pc.name = clsname
 	pc.constructor = ClassDB.instantiate.bind(clsname)
 	for prop in ClassDB.class_get_property_list(clsname):
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			pc.allowed_properties[prop.name] = prop
+			pc.allowed_properties[prop.name] = true # prop
 	
 	class_registry[clsname] = pc
 	return pc
