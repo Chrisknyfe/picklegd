@@ -1,7 +1,7 @@
 files: addons/picklemp/.*
 repos:
 -   repo: https://github.com/Scony/godot-gdscript-toolkit.git
-    rev: 4.3.1
+    rev: 4.3.3
     hooks:
     -   id: gdlint
     -   id: gdformat
