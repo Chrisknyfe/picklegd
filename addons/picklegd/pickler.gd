@@ -178,8 +178,8 @@ func register_custom_class(scr: Script) -> RegisteredClass:
 	for prop in proplist:
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
 			rc.allowed_properties[prop.name] = prop
-	
-	return class_registry.register(rc) as RegisteredClass
+	class_registry.register(rc.name, rc)
+	return rc
 
 
 ## Register a godot engine native class. 
@@ -200,7 +200,8 @@ func register_native_class(cls_name: String) -> RegisteredClass:
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
 			rc.allowed_properties[prop.name] = prop
 	
-	return class_registry.register(rc) as RegisteredClass
+	class_registry.register(rc.name, rc)
+	return rc
 
 func has_custom_class(scr: Script) -> bool:
 	var gname := scr.get_global_name()
