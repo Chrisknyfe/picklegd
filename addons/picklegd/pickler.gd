@@ -154,24 +154,24 @@ func register_custom_class(scr: Script) -> PicklableClass:
 	pc.constructor = scr.new
 
 	var methods = scr.get_script_method_list()
-	pc.serialize_defaults = serialize_defaults
+	var can_create_default_object := true
 	for method in methods:
 		match method.name:
 			"_init":
 				pc.newargs_len = len(method.args)
 				if pc.newargs_len > 0:
-					pc.serialize_defaults = true
+					can_create_default_object = false
 			"__getnewargs__":
 				pc.__getnewargs__ = _object_getnewargs
-				pc.serialize_defaults = true
+				can_create_default_object = false
 			"__getstate__":
 				pc.__getstate__ = _object_getstate
-				pc.serialize_defaults = true
+				can_create_default_object = false
 			"__setstate__":
 				pc.__setstate__ = _object_setstate
-				pc.serialize_defaults = true
+				can_create_default_object = false
 
-	if pc.newargs_len == 0 and not pc.serialize_defaults:
+	if can_create_default_object:
 		pc.default_object = scr.new()
 
 	var proplist = scr.get_script_property_list()
@@ -290,7 +290,7 @@ func pre_pickle_object(obj: Object):
 	if not pc.__getstate__.is_null():
 		dict = pc.__getstate__.call(obj)
 	else:
-		if pc.serialize_defaults or pc.default_object == null:
+		if serialize_defaults or pc.default_object == null:
 			for propname in pc.allowed_properties:
 				dict[propname] = obj.get(propname)
 		else:
