@@ -290,7 +290,7 @@ func pre_pickle_object(obj: Object):
 	if not pc.__getstate__.is_null():
 		dict = pc.__getstate__.call(obj)
 	else:
-		if pc.serialize_defaults:
+		if pc.serialize_defaults or pc.default_object == null:
 			for propname in pc.allowed_properties:
 				dict[propname] = obj.get(propname)
 		else:

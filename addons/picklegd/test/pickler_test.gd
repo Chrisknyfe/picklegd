@@ -1,3 +1,4 @@
+#gdlint:disable=max-public-methods
 # GdUnit generated TestSuite
 class_name PicklerTest
 extends GdUnitTestSuite
@@ -77,6 +78,13 @@ var _misc = {
 	"json_things": ["str", 42, {"foo": "bar"}, [1, 2, 3], true, false, null],
 	"json_things_2": {"foo": "bar", "baz": 123},
 	"nativeobj": Node2D.new(),
+}
+
+var _all = {
+	"builtin": _builtins,
+	"resources": _resources,
+	"customs": _customs,
+	"misc": _misc,
 }
 
 
@@ -300,3 +308,52 @@ func _init():
 	print(s)
 	u = _pickler.unpickle_str(s)
 	assert_object(scr).is_not_equal(u)
+
+
+func test_compressed():
+	_pickler.register_custom_class(CustomClassOne)
+	_pickler.register_custom_class(TestFormUnsafe)
+	_pickler.register_native_class("Resource")
+	_pickler.register_native_class("CircleShape2D")
+	_pickler.register_native_class("Image")
+	_pickler.register_native_class("Node2D")
+	var pickle := _pickler.pickle(_all)
+	var comp := _pickler.pickle_compressed(_all)
+	assert_int(comp.size()).is_less(pickle.size())
+	var u = _pickler.unpickle(pickle)
+	var udecomp = _pickler.unpickle_compressed(comp)
+	check_are_equal(u, udecomp)
+	u["misc"]["nativeobj"].queue_free()
+	udecomp["misc"]["nativeobj"].queue_free()
+
+
+func test_builtins_omitted():
+	_pickler.serialize_defaults = false
+	var reg = _pickler.register_custom_class(BigClassThing)
+	var big = BigClassThing.new()
+	var pre = _pickler.pre_pickle(big)
+	# should only contain Pickler.CLASS_KEY
+	assert_int(pre.size()).is_equal(1)
+	var u = _pickler.post_unpickle(pre)
+	assert_object(u).is_equal(big)
+
+	_pickler.class_registry.clear()
+
+	_pickler.serialize_defaults = true
+	reg = _pickler.register_custom_class(BigClassThing)
+	pre = _pickler.pre_pickle(BigClassThing.new())
+	# should contain Pickler.CLASS_KEY + all allowed properties
+	assert_int(pre.size()).is_equal(1 + reg.allowed_properties.size())
+	u = _pickler.post_unpickle(pre)
+	assert_object(u).is_equal(big)
+
+
+func test_builtins_not_omitted():
+	_pickler.serialize_defaults = false
+	var reg = _pickler.register_custom_class(CustomClassNewargs)
+	var obj = CustomClassNewargs.new("hello")
+	var pre = _pickler.pre_pickle(obj)
+	# should contain Pickler.CLASS_KEY + some state
+	assert_int(pre.size()).is_greater(1)
+	var u = _pickler.post_unpickle(pre)
+	assert_object(u).is_equal(obj)
