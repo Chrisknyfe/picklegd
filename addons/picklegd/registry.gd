@@ -107,16 +107,25 @@ func has_by_id(id: int):
 	return id in by_id
 
 
-func get_id(name: StringName):
+func find_id(name: StringName):
 	return name_to_id[name]
 
 
-func get_name(id: int):
+func find_name(id: int):
 	return id_to_name[id]
 
 
 func size():
 	return by_name.size()
+	
+func names():
+	return by_name.keys()
+	
+func ids():
+	return by_id.keys()
+	
+func values():
+	return by_name.values()
 
 
 # TODO: allow the ability to override associations after registering content.
@@ -199,4 +208,3 @@ func is_valid() -> bool:
 		if not is_entry_valid(name):
 			return false
 	return true
-	
