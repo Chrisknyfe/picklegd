@@ -109,8 +109,8 @@ const CLASS_KEY = "__CLS"
 const NEWARGS_KEY = "__NEW"
 
 
-## Registry of classes that are allowed to be pickled.
-var class_registry: Registry = Registry.new()
+## registry of classes that are allowed to be pickled.
+var class_registry: Dictionary[StringName, PicklableClass] = {}
 
 var serialize_defaults := false
 
@@ -119,7 +119,7 @@ var compression_mode: FileAccess.CompressionMode = FileAccess.COMPRESSION_DEFLAT
 ## Get a name for this object's class. 
 ## Returns the obj's class name,
 ## or null if there's no class name for this object.
-func get_object_class_name(obj: Object) -> String:
+func get_object_class_name(obj: Object) -> StringName:
 	var scr: Script = obj.get_script()
 	var clsname = &""
 	if scr != null:
@@ -142,75 +142,75 @@ func _object_setstate(obj: Object, state: Dictionary) -> void:
 ## Register a custom class that can be pickled with this pickler. Returns the
 ## [RegisteredBehavior] object representing this custom class.
 func register_custom_class(scr: Script) -> PicklableClass:
-	var gname := scr.get_global_name()
-	if gname.is_empty():
+	var clsname := scr.get_global_name()
+	if clsname.is_empty():
 		push_warning("Cannot get custom class name")
 		return null
 	
-	var rc = PicklableClass.new()
-	rc.name = gname
+	var pc := PicklableClass.new()
+	#pc.name = clsname
 	
 	# Interrogate the class at registration time to speed up pickling / unpickling	
-	rc.constructor = scr.new
+	pc.constructor = scr.new
 	
 	var methods = scr.get_script_method_list()
-	rc.serialize_defaults = serialize_defaults
+	pc.serialize_defaults = serialize_defaults
 	for method in methods:
 		match method.name:
 			"_init":
-				rc.newargs_len = len(method.args)
-				if rc.newargs_len > 0:
-					rc.serialize_defaults = true
+				pc.newargs_len = len(method.args)
+				if pc.newargs_len > 0:
+					pc.serialize_defaults = true
 			"__getnewargs__":
-				rc.__getnewargs__ = _object_getnewargs
-				rc.serialize_defaults = true
+				pc.__getnewargs__ = _object_getnewargs
+				pc.serialize_defaults = true
 			"__getstate__":
-				rc.__getstate__ = _object_getstate
-				rc.serialize_defaults = true
+				pc.__getstate__ = _object_getstate
+				pc.serialize_defaults = true
 			"__setstate__":
-				rc.__setstate__ = _object_setstate
-				rc.serialize_defaults = true
+				pc.__setstate__ = _object_setstate
+				pc.serialize_defaults = true
 	
-	if rc.newargs_len == 0 and not rc.serialize_defaults:
-		rc.default_object = scr.new()
+	if pc.newargs_len == 0 and not pc.serialize_defaults:
+		pc.default_object = scr.new()
 	
 	var proplist = scr.get_script_property_list()
 	for prop in proplist:
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			rc.allowed_properties[prop.name] = prop
-	class_registry.register(rc.name, rc)
-	return rc
+			pc.allowed_properties[prop.name] = prop
+	class_registry[clsname] = pc
+	return pc
 
 
 ## Register a godot engine native class. 
-## cls_name must match the name returned by instance.class_name().
+## clsname must match the name returned by instance.class_name().
 ## Returns the [RegisteredBehavior] object representing this native class.
-func register_native_class(cls_name: String) -> PicklableClass:
-	if not ClassDB.class_exists(cls_name):
-		push_warning("Native class is not recognized: ", cls_name)
+func register_native_class(clsname: StringName) -> PicklableClass:
+	if not ClassDB.class_exists(clsname):
+		push_warning("Native class is not recognized: ", clsname)
 		return null
-	if not ClassDB.can_instantiate(cls_name):
-		push_warning("Native class cannot be instantiated: ", cls_name)
+	if not ClassDB.can_instantiate(clsname):
+		push_warning("Native class cannot be instantiated: ", clsname)
 		return null
 		
-	var rc = PicklableClass.new()
-	rc.name = cls_name
-	rc.constructor = ClassDB.instantiate.bind(cls_name)
-	for prop in ClassDB.class_get_property_list(cls_name):
+	var pc := PicklableClass.new()
+	#pc.name = clsname
+	pc.constructor = ClassDB.instantiate.bind(clsname)
+	for prop in ClassDB.class_get_property_list(clsname):
 		if prop.usage & PROP_WHITELIST and not prop.usage & PROP_BLACKLIST:
-			rc.allowed_properties[prop.name] = prop
+			pc.allowed_properties[prop.name] = prop
 	
-	class_registry.register(rc.name, rc)
-	return rc
+	class_registry[clsname] = pc
+	return pc
 
 func has_custom_class(scr: Script) -> bool:
-	var gname := scr.get_global_name()
-	if gname.is_empty():
+	var clsname := scr.get_global_name()
+	if clsname.is_empty():
 		return false
-	return class_registry.has_by_name(gname)
+	return clsname in class_registry
 	
-func has_native_class(cls_name: String):
-	return class_registry.has_by_name(cls_name)
+func has_native_class(clsname: String):
+	return clsname in class_registry
 
 ## Pickle the arbitary GDScript data to a string.
 func pickle_str(obj) -> String:
@@ -280,31 +280,31 @@ func pre_pickle(obj):
 
 func pre_pickle_object(obj: Object):
 	var clsname = get_object_class_name(obj)
-	if clsname.is_empty() or not clsname in class_registry.by_name:
+	if clsname.is_empty() or not clsname in class_registry:
 		return null
-	var reg: PicklableClass = class_registry.by_name[clsname]
+	var pc: PicklableClass = class_registry[clsname]
 	var dict = {}
-	if not reg.__getstate__.is_null():
-		dict = reg.__getstate__.call(obj)
+	if not pc.__getstate__.is_null():
+		dict = pc.__getstate__.call(obj)
 	else:
-		if reg.serialize_defaults:
-			for propname in reg.allowed_properties:
+		if pc.serialize_defaults:
+			for propname in pc.allowed_properties:
 				dict[propname] = obj.get(propname)
 		else:
-			for propname in reg.allowed_properties:
+			for propname in pc.allowed_properties:
 				var value = obj.get(propname)
-				if value != reg.default_object.get(propname):
+				if value != pc.default_object.get(propname):
 					dict[propname] = obj.get(propname)
 	
 	# recursive pre_pickle of the state we just got
 	for key in dict:
 		dict[key] = pre_pickle(dict[key])
 	
-	dict[CLASS_KEY] = reg.id
+	dict[CLASS_KEY] = clsname
 	
 	# TODO: test constructor args that have defaults
-	if reg.newargs_len > 0 and not reg.__getnewargs__.is_null():
-		dict[NEWARGS_KEY] = reg.__getnewargs__.call(obj)
+	if pc.newargs_len > 0 and not pc.__getnewargs__.is_null():
+		dict[NEWARGS_KEY] = pc.__getnewargs__.call(obj)
 		for i in range(len(dict[NEWARGS_KEY])):
 			dict[NEWARGS_KEY][i] = pre_pickle(dict[NEWARGS_KEY][i])
 	return dict
@@ -341,31 +341,31 @@ func post_unpickle(obj):
 
 ## Post-process recently unpickled dictionary that represents an object.
 func post_unpickle_object(dict: Dictionary):
-	var clsid = dict[CLASS_KEY]
+	var clsname = dict[CLASS_KEY]
 	dict.erase(CLASS_KEY)	
-	if typeof(clsid) != TYPE_INT:
+	if typeof(clsname) != TYPE_STRING_NAME:
 		return null
-	if not clsid in class_registry.by_id:
+	if not clsname in class_registry:
 		return null
-	var reg: PicklableClass = class_registry.by_id[clsid]
+	var pc: PicklableClass = class_registry[clsname]
 	
 	var obj = null
 	if NEWARGS_KEY in dict:
-		if reg.newargs_len > 0 and not reg.__getnewargs__.is_null():
+		if pc.newargs_len > 0 and not pc.__getnewargs__.is_null():
 			var newargs: Array = dict[NEWARGS_KEY]
 			newargs = newargs.map(post_unpickle)
-			obj = reg.constructor.callv(newargs)
+			obj = pc.constructor.callv(newargs)
 		dict.erase(NEWARGS_KEY)
 	else:
-		obj = reg.constructor.call()
+		obj = pc.constructor.call()
 		
 	if obj != null:
-		if not reg.__setstate__.is_null():
+		if not pc.__setstate__.is_null():
 			for key in dict:
 				dict[key] = post_unpickle(dict[key])
-			reg.__setstate__.call(obj, dict)
+			pc.__setstate__.call(obj, dict)
 		else:
-			for propname in reg.allowed_properties:
+			for propname in pc.allowed_properties:
 				if dict.has(propname):
 					obj.set(propname, post_unpickle(dict[propname]))
 	return obj

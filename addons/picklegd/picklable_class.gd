@@ -1,5 +1,5 @@
 class_name PicklableClass
-extends RegisteredObject
+extends RefCounted
 ## A class type registered with a [Pickler].
 ## Contains everything needed to reconstruct an object of this type
 

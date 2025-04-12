@@ -151,23 +151,23 @@ func test_roundtrip_resources() -> void:
 	_pickler.register_native_class("Resource")
 	_pickler.register_native_class("CircleShape2D")
 	_pickler.register_native_class("Image")
-	assert_that(_pickler.class_registry.has_by_name("Resource"))
-	assert_that(_pickler.class_registry.has_by_name("CircleShape2D"))
-	assert_that(_pickler.class_registry.has_by_name("Image"))
+	assert_that(_pickler.has_native_class("Resource"))
+	assert_that(_pickler.has_native_class("CircleShape2D"))
+	assert_that(_pickler.has_native_class("Image"))
 	roundtrip(_resources)
 
 
 func test_roundtrip_customs() -> void:
 	_pickler.register_custom_class(CustomClassOne)
 	_pickler.register_custom_class(TestFormUnsafe)
-	assert_that(_pickler.class_registry.has_by_name("CustomClassOne"))
-	assert_that(_pickler.class_registry.has_by_name("TestFormUnsafe"))
+	assert_that(_pickler.has_custom_class(CustomClassOne))
+	assert_that(_pickler.has_custom_class(TestFormUnsafe))
 	roundtrip(_customs)
 	
 	
 func test_roundtrip_misc() -> void:
 	_pickler.register_native_class("Node2D")
-	assert_that(_pickler.class_registry.has_by_name("Node2D"))
+	assert_that(_pickler.has_native_class("Node2D"))
 	roundtrip(_misc)
 
 
@@ -207,33 +207,6 @@ func test_pickle_filtering():
 
 	#assert_error(_pickler.pre_pickle.bind(Node2D.new()))\
 	#.is_push_error('Missing object type in picked data: Node2D')
-
-# TODO: this should be a set of tests for a Registry
-func test_pickle_load_associations() -> void:
-	_pickler.register_custom_class(CustomClassOne)
-	_pickler.register_custom_class(CustomClassTwo)
-	_pickler.register_native_class("Node2D")
-	assert_that(_pickler.has_custom_class(CustomClassOne))
-	assert_that(_pickler.has_custom_class(CustomClassTwo))
-	assert_that(_pickler.has_native_class("Node2D"))
-	
-	var p2: Pickler = Pickler.new()
-
-	var assoc = _pickler.class_registry.get_associations()
-	p2.class_registry.add_name_to_id_associations(assoc)
-	p2.register_native_class("Node2D")
-	p2.register_custom_class(CustomClassTwo)
-	p2.register_custom_class(CustomClassOne)
-	assert_that(p2.has_custom_class(CustomClassOne))
-	assert_that(p2.has_custom_class(CustomClassTwo))
-	assert_that(p2.has_native_class("Node2D"))
-
-	for cls_name in _pickler.class_registry.by_name:
-		var cls1 = _pickler.class_registry.get_by_name(cls_name)
-		var cls2 = p2.class_registry.get_by_name(cls_name)
-		assert_str(cls1.name).is_equal(cls2.name)
-		assert_int(cls1.id).is_equal(cls2.id)
-
 
 func test_newargs():
 	_pickler.register_custom_class(CustomClassNewargs)
@@ -284,14 +257,23 @@ func test_base_pickle_inline_object():
 func test_base_pickle_inject_script_change():
 	_pickler.register_custom_class(TestForm)
 	
+	# Injection doesn't work when the new class isn't registered
 	var t = TestForm.new()
 	var s = _pickler.pickle_str(t)
 	s = s.replace("TestForm", "TestFormUnsafe")
 	print(s)
 	var u = _pickler.unpickle_str(s)
 	print(u)
-	assert_object(u).is_instanceof(TestForm)
+	assert_object(u).is_null()
 
+	# ...but injection can work if the other class is registered
+	_pickler.register_custom_class(TestFormUnsafe)
+	s = _pickler.pickle_str(t)
+	s = s.replace("TestForm", "TestFormUnsafe")
+	print(s)
+	u = _pickler.unpickle_str(s)
+	print(u)
+	assert_object(u).is_instanceof(TestFormUnsafe)
 
 	
 ## A pickled script shouldn't have any source code. Sorry.
