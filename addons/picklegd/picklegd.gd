@@ -14,10 +14,7 @@ func _enter_tree():
 		pickle_nojar
 	)
 	add_custom_type(
-		"Pickler",
-		"RefCounted",
-		preload("res://addons/picklegd/pickler.gd"),
-		picklejar_pickle_fancy
+		"Pickler", "RefCounted", preload("res://addons/picklegd/pickler.gd"), picklejar_pickle_fancy
 	)
 
 

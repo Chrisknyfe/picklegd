@@ -1,4 +1,4 @@
-files: addons/picklemp/.*
+files: addons/picklegd/.*
 repos:
 -   repo: https://github.com/Scony/godot-gdscript-toolkit.git
     rev: 4.3.3
