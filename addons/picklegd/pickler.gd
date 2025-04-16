@@ -110,8 +110,10 @@ const NEWARGS_KEY := &"__NEW"
 ## registry of classes that are allowed to be pickled.
 var class_registry: Dictionary[StringName, PicklableClass] = {}
 
-var serialize_defaults := false
+## Serialize default values of Objects. Set to false to strip default values from objects.
+var serialize_defaults := true
 
+## Compression method for compressing and decompressing pickles
 var compression_mode: FileAccess.CompressionMode = FileAccess.COMPRESSION_DEFLATE
 
 
@@ -203,6 +205,7 @@ func register_native_class(clsname: StringName) -> PicklableClass:
 	return pc
 
 
+## Returns true if this custom class has been registered, otherwise false.
 func has_custom_class(scr: Script) -> bool:
 	var clsname := scr.get_global_name()
 	if clsname.is_empty():
@@ -210,6 +213,7 @@ func has_custom_class(scr: Script) -> bool:
 	return clsname in class_registry
 
 
+## Returns true if this native class has been registered, otherwise false.
 func has_native_class(clsname: String):
 	return clsname in class_registry
 
@@ -281,6 +285,7 @@ func pre_pickle(obj):
 	return retval
 
 
+## Preprocess an Object, returning a dictionary representing the object.
 func pre_pickle_object(obj: Object):
 	var clsname = get_object_class_name(obj)
 	if clsname.is_empty() or not clsname in class_registry:
