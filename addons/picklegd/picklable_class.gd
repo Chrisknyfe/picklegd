@@ -19,14 +19,20 @@ var allowed_properties: Dictionary[StringName, bool] = {}
 ## set to false.
 var default_object: Object = null
 
-## Get constructor arguments that will be used at unpickling time
+## Custom serialization function which gets
+## constructor arguments that will be used at unpickling time
+## [br]
 ## func __getnewargs__(obj: Object) -> Array
 var __getnewargs__: Callable = Callable()
 
-## Get picklable state of the object.
+## Custom serialization function which gets the
+## picklable state of the object.
+## [br]
 ## func __getstate__(obj: Object) -> Dictionary
 var __getstate__: Callable = Callable()
 
-## Set state of the object after unpickling.
+## Custom serialization function which
+## sets the state of the object after unpickling.
+## [br]
 ## func __setstate__(obj: Object, state: Dictionary) -> void
 var __setstate__: Callable = Callable()

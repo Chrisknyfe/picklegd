@@ -59,9 +59,8 @@ You can create compressed binary pickles using `Pickler.pickle_compressed()`.
 # Customizing a pickle
 
 You can also have direct control over which properties are serialized/deserialized by adding
-`__getnewargs__()`,
-`__getstate__()` and `__setstate__()` methods to your custom class.
-The [Pickler] will first call `__getnewargs__()` to get the arguments for the
+`__getnewargs__()`, `__getstate__()` and `__setstate__()` methods to your custom class.
+The Pickler will first call `__getnewargs__()` to get the arguments for the
 object's constructor, then
 will call `__getstate__()` to retrieve an Object's properties during
 serialization, and later will call `__setstate__()` to set an Object's properties
@@ -84,15 +83,18 @@ var baz: float = 4.0
 var qux: String = "x"
 
 func _init(new_foo: String):
-    foo = new_foo
+	foo = new_foo
 
 func __getnewargs__() -> Array:
-    return [foo]
+	return [foo]
 
 func __getstate__() -> Dictionary:
-    return {"1": baz, "2": qux}
+	return {"1": baz, "2": qux}
 
 func __setstate__(state: Dictionary):
-    baz = state["1"]
-    qux = state["2"]
+	baz = state["1"]
+	qux = state["2"]
 ```
+
+The PicklableClass for an Object type that is created at registration time also has
+`__getnewargs__()`, `__getstate__()` and `__setstate__()` functions you can override.

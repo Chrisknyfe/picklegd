@@ -93,6 +93,8 @@ extends RefCounted
 ## var pickle = pickler.pickle(obj)
 ## var plain_data = pickler.unpickle(pickle)
 ## [/codeblock]
+## The [PicklableClass] for an Object type that is created at registration time also has
+## `__getnewargs__()`, `__getstate__()` and `__setstate__()` functions you can override.
 ##
 
 const PROP_WHITELIST: PropertyUsageFlags = (
