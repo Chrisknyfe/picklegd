@@ -67,7 +67,7 @@ var _builtins = {
 var _resources = {
 	"resource": Resource.new(),
 	"circle": CircleShape2D.new(),
-	"image": Image.load_from_file("res://icon.svg"),
+	"image": Image.create_empty(16, 16, false, Image.FORMAT_RGB8),
 	#"material": load("res://test/picklegd/test_mat.tres")
 }
 var _customs = {

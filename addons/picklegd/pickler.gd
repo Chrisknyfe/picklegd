@@ -383,10 +383,16 @@ func post_unpickle_object(dict: Dictionary):
 					match typeof(value):
 						TYPE_ARRAY:
 							var arr = obj.get(propname) as Array
-							arr.assign(value)
+							if arr.is_typed():
+								arr.assign(value)
+							else:
+								obj.set(propname, value)
 						TYPE_DICTIONARY:
 							var d2 = obj.get(propname) as Dictionary
-							d2.assign(value)
+							if d2.is_typed():
+								d2.assign(value)
+							else:
+								obj.set(propname, value)
 						_:
 							obj.set(propname, value)
 	return obj
