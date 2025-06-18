@@ -357,3 +357,55 @@ func test_builtins_not_omitted():
 	assert_int(pre.size()).is_greater(1)
 	var u = _pickler.post_unpickle(pre)
 	assert_object(u).is_equal(obj)
+
+
+func test_typed_arrays():
+	var a: Array[int] = [1, 2, 3, 4]
+	var p = _pickler.pickle(a)
+	var u = _pickler.unpickle(p)
+	assert_array(u).contains_exactly(a)
+
+
+func test_typed_dictionaries():
+	var d: Dictionary[int, String] = {
+		1: "foo",
+		3: "baz",
+	}
+	var p = _pickler.pickle(d)
+	var u = _pickler.unpickle(p)
+	check_are_equal(d, u)
+
+
+func test_typed_elements_in_objects():
+	var reg = _pickler.register_custom_class(CustomClassTypedElements)
+	var o = CustomClassTypedElements.new()
+	o.arr.append_array([1, 2, 3, 5, 7])
+	o.dee.assign({"one": 1.0, "dos": 2.2, "trace": 3.33})
+	var p = _pickler.pickle(o)
+	var u = _pickler.unpickle(p)
+	check_are_equal(o, u)
+
+
+func test_typed_elements_in_objects_no_defaults():
+	_pickler.serialize_defaults = false
+	var reg = _pickler.register_custom_class(CustomClassTypedElements)
+	var o = CustomClassTypedElements.new()
+
+	# don't serialize defaults
+	var p = _pickler.pickle(o)
+	var u = _pickler.unpickle(p)
+	check_are_equal(o, u)
+
+	# overwrite defaults
+	o.arr.append_array([1, 2, 3, 5, 7])
+	o.dee.assign({"one": 1.0, "dos": 2.2, "trace": 3.33})
+	p = _pickler.pickle(o)
+	u = _pickler.unpickle(p)
+	check_are_equal(o, u)
+
+	# clear them
+	o.arr.clear()
+	o.dee.clear()
+	p = _pickler.pickle(o)
+	u = _pickler.unpickle(p)
+	check_are_equal(o, u)

@@ -379,5 +379,14 @@ func post_unpickle_object(dict: Dictionary):
 		else:
 			for propname in pc.allowed_properties:
 				if dict.has(propname):
-					obj.set(propname, post_unpickle(dict[propname]))
+					var value = post_unpickle(dict[propname])
+					match typeof(value):
+						TYPE_ARRAY:
+							var arr = obj.get(propname) as Array
+							arr.assign(value)
+						TYPE_DICTIONARY:
+							var d2 = obj.get(propname) as Dictionary
+							d2.assign(value)
+						_:
+							obj.set(propname, value)
 	return obj
