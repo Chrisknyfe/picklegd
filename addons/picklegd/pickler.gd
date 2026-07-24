@@ -119,7 +119,6 @@ var serialize_defaults := true
 var compression_mode: FileAccess.CompressionMode = FileAccess.COMPRESSION_DEFLATE
 
 
-## Get a name for this object's class.
 ## Returns the obj's class name,
 ## or an empty StringName if there's no class name for this object.
 func get_object_class_name(obj: Object) -> StringName:
@@ -127,10 +126,11 @@ func get_object_class_name(obj: Object) -> StringName:
 	var clsname = &""
 	if scr != null:
 		clsname = scr.get_global_name()
+		if clsname == "":
+			clsname = scr.get_base_script().get_global_name() #If there is no class_name, we should fall upwards a layer to see what it inherits from and use that instead.
 	else:
 		clsname = obj.get_class()
 	return clsname
-
 
 func _object_getnewargs(obj: Object) -> Array:
 	return obj.__getnewargs__()
