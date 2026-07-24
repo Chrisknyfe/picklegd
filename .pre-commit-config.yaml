@@ -1,7 +1,7 @@
 files: addons/picklegd/.*
 repos:
 -   repo: https://github.com/Scony/godot-gdscript-toolkit.git
-    rev: 4.3.3
+    rev: 4.5.0
     hooks:
     -   id: gdlint
     -   id: gdformat

@@ -121,7 +121,7 @@ var compression_mode: FileAccess.CompressionMode = FileAccess.COMPRESSION_DEFLAT
 
 ## Get a name for this object's class.
 ## Returns the obj's class name,
-## or null if there's no class name for this object.
+## or an empty StringName if there's no class name for this object.
 func get_object_class_name(obj: Object) -> StringName:
 	var scr: Script = obj.get_script()
 	var clsname = &""
@@ -145,7 +145,7 @@ func _object_setstate(obj: Object, state: Dictionary) -> void:
 
 
 ## Register a custom class that can be pickled with this pickler. Returns the
-## [RegisteredBehavior] object representing this custom class.
+## [PicklableClass] object representing this custom class.
 func register_custom_class(scr: Script) -> PicklableClass:
 	var clsname := scr.get_global_name()
 	if clsname.is_empty():
@@ -187,8 +187,8 @@ func register_custom_class(scr: Script) -> PicklableClass:
 
 
 ## Register a godot engine native class.
-## clsname must match the name returned by instance.class_name().
-## Returns the [RegisteredBehavior] object representing this native class.
+## clsname must match the name returned by instance.get_class().
+## Returns the [PicklableClass] object representing this native class.
 func register_native_class(clsname: StringName) -> PicklableClass:
 	if not ClassDB.class_exists(clsname):
 		push_warning("Native class is not recognized: ", clsname)
