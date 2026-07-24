@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://jinh50i3h2ls"]
+[gd_scene format=3 uid="uid://jinh50i3h2ls"]
 
 [ext_resource type="Script" uid="uid://dyhrn0juis4ps" path="res://addons/picklegd/test/main_benchmark_test.gd" id="1_bndhn"]
 
-[node name="MainBenchmarkTest" type="Control"]
+[node name="MainBenchmarkTest" type="Control" unique_id=582372105]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
