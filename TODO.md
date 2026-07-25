@@ -14,3 +14,5 @@ https://github.com/Chrisknyfe/picklegd/pull/4
 class ExampleClass:
     const __CLASS_NAME__ = "ExampleClass"
 ```
+- Fix all warnings in all files (I think the examples have warnings)
+- Fix memory leaks in all unit tests
